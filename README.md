@@ -14,7 +14,9 @@ Table of Contents
 
 ## <a name="requirements"></a> System requirements-
 
-Snaq-seq only supports Linux systems and uses the docker application. If docker is not installed, the pre-alpha version will attempt to set up docker. The installation may be subjected to requiring admin priveleges. 
+Snaq-seq only supports Linux systems and uses the docker application. 
+
+If docker is not installed, the pre-alpha version will attempt to set up docker. The installation may be subjected to requiring admin priveleges. 
 
 Snaq-seq will verfiy both system requirements before proceeding.
 
@@ -32,10 +34,65 @@ Docker application verified...
 
 #### Reference genome:
 
+Snaq-seq uses the bwa aligner for the analysis which requires the reference genome (fasta format) and bwa indices. 
+
+Snaq-seq will verify if there are existing bwa indices made available that can be used for the analysis.
+
+```
+
+$ bash snaq-seq.sh /home/input/fastq /home/output /home/input/reference_genome.fasta /home/input/reference_amplicon.fasta /home/input/amplicon_adjustment.txt 60 1 1 0 300 300
+
+...
+
+
+* Does your reference genome data include bwa indices? 
+If yes, please make sure they are located in the same folder where the reference genome is, the file path will be asked for. 
+If no, the analysis will build the bwa indices on the fly. 
+  Type [Y/N]:
+```
+
+If the answer is Y (yes), you will be asked to provide the filepath location in which both the bwa indices and references are located in the same folder.
+
+* Note: If Snaq-seq is unable to detect any bwa indices it will proceed with generating indices on the fly to be used for the analysis.
+
+
+```
+
+$ bash snaq-seq.sh /home/input/fastq /home/output /home/input/reference_genome.fasta /home/input/reference_amplicon.fasta /home/input/amplicon_adjustment.txt 60 1 1 0 300 300
+
+...
+
+
+Type [Y/N]: Y
+* Please provide the file path (no file names) of the indices location (reference genome must be located in same path): /home/input/ref
+
+* Snaq-seq is preparing to launch... 
+```
+
+If the answer is N (no), Snaq-seq will proceed to generate bwa on the fly and verify if the indices should be saved for future analysis.
+
+```
+
+$ bash snaq-seq.sh /home/input/fastq /home/output /home/input/reference_genome.fasta /home/input/reference_amplicon.fasta /home/input/amplicon_adjustment.txt 60 1 1 0 300 300
+
+...
+
+
+Type [Y/N]: N
+
+* Do you want to keep the bwa indices that will be generated for future analysis?:
+ Type [Y/N]: Y
+
+* Snaq-seq is preparing to launch... 
+```
+
 #### Reference amplicon:
+
+The reference amplicon is required to be provided in fasta format. This is to be used to generate the basechange data for the analysis.
 
 #### Adjustment amplicon:
 
+The adjustment amplicon is required to be provided in tab seperated format used to generate result values in the output.
 
 ## <a name="usage-options"></a> Usage-
 
