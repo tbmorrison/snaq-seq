@@ -6,5 +6,5 @@ Please run the following for information about options and how to run:
 
 ```
 
-'snaq-seq.sh -h' 
+user$ bash snaq-seq.sh -h 
 ```
