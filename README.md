@@ -14,6 +14,20 @@ Table of Contents
 
 ## <a name="requirements"></a> System requirements-
 
+Snaq-seq only supports Linux systems and uses the docker application. If docker is not installed, the pre-alpha version will attempt to set up docker. The installation may be subjected to requiring admin priveleges. 
+
+Snaq-seq will verfiy both system requirements before proceeding.
+
+```
+
+$ bash snaq-seq.sh /home/input/fastq /home/output /home/input/reference_genome.fasta /home/input/reference_amplicon.fasta /home/input/amplicon_adjustment.txt 60 1 1 0 300 300
+
+
+Linux system verified...
+
+Docker application verified... 
+``` 
+
 ## <a name="data"></a> Input data-
 
 #### Reference genome:
