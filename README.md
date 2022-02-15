@@ -76,7 +76,7 @@ CC: 300
 IS: 300 
 
 
-  \* Please review the options provided above. 
+  * Please review the options provided above. 
  All of the options are required for the analysis, are they specified and indicated in the correct order? 
   Type [Y/N]: 
 ```
