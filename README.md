@@ -6,7 +6,7 @@ For information about usage and options, run ```bash snaq-seq.sh -h```:
 
 ```
 
-user$ bash snaq-seq.sh -h 
+$ bash snaq-seq.sh -h 
 
      Snaq-Seq: QC for viral surveillance NGS testing.     
 
