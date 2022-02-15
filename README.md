@@ -51,9 +51,9 @@ If no, the analysis will build the bwa indices on the fly.
   Type [Y/N]:
 ```
 
-If the answer is Y (yes), you will be asked to provide the filepath location in which both the bwa indices and references are located in the same folder.
+If the answer is Y (yes), the filepath location in which both the bwa indices and reference genome located in the same folder is required to be provided.
 
-* Note: If Snaq-seq is unable to detect any bwa indices it will proceed with generating indices on the fly to be used for the analysis.
+* Note: If Snaq-seq is unable to detect any bwa indices in the filepath provided, it will proceed with generating indices on the fly to be used for the analysis (the generated indices won't be saved).
 
 
 ```
@@ -69,7 +69,7 @@ Type [Y/N]: Y
 * Snaq-seq is preparing to launch... 
 ```
 
-If the answer is N (no), Snaq-seq will proceed to generate bwa on the fly and verify if the indices should be saved for future analysis.
+If the answer is N (no), Snaq-seq will proceed to generate bwa indices on the fly and verify if the indices should be saved for future analysis.
 
 ```
 
