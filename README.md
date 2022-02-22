@@ -16,14 +16,13 @@ Table of Contents
 
 Snaq-seq only supports Linux systems and uses the docker application. 
 
-If docker is not installed, the pre-alpha version will attempt to set up docker. The installation may be subjected to requiring admin priveleges. 
+If docker is not installed, the beta version will attempt to set up docker that will require sudo (admin) priveleges. 
 
 Snaq-seq will verfiy both system requirements before proceeding.
 
 ```
 
-$ bash snaq-seq.sh /home/input/fastq /home/output /home/input/reference_genome.fasta /home/input/reference_amplicon.fasta /home/input/amplicon_adjustment.txt 60 1 1 0 300 300
-
+$ bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300
 
 Linux system verified...
 
@@ -38,61 +37,17 @@ Snaq-seq uses the bwa aligner for the analysis which requires the reference geno
 
 Snaq-seq will verify if there are existing bwa indices made available that can be used for the analysis.
 
-```
-
-$ bash snaq-seq.sh /home/input/fastq /home/output /home/input/reference_genome.fasta /home/input/reference_amplicon.fasta /home/input/amplicon_adjustment.txt 60 1 1 0 300 300
-
-...
-
-
-* Does your reference genome data include bwa indices? 
-If yes, please make sure they are located in the same folder where the reference genome is, the file path will be asked for. 
-If no, the analysis will build the bwa indices on the fly. 
-  Type [Y/N]:
-```
-
-If the answer is Y (yes), the filepath location in which both the bwa indices and reference genome located in the same folder is required to be provided.
 
 * Note: If Snaq-seq is unable to detect any bwa indices in the filepath provided, it will proceed with generating indices on the fly to be used for the analysis (the generated indices won't be saved).
 
 
-```
-
-$ bash snaq-seq.sh /home/input/fastq /home/output /home/input/reference_genome.fasta /home/input/reference_amplicon.fasta /home/input/amplicon_adjustment.txt 60 1 1 0 300 300
-
-...
-
-
-Type [Y/N]: Y
-* Please provide the file path (no file names) of the indices location (reference genome must be located in same path): /home/input/ref
-
-* Snaq-seq is preparing to launch... 
-```
-
-If the answer is N (no), Snaq-seq will proceed to generate bwa indices on the fly and verify if the indices should be saved for future analysis.
-
-```
-
-$ bash snaq-seq.sh /home/input/fastq /home/output /home/input/reference_genome.fasta /home/input/reference_amplicon.fasta /home/input/amplicon_adjustment.txt 60 1 1 0 300 300
-
-...
-
-
-Type [Y/N]: N
-
-* Do you want to keep the bwa indices that will be generated for future analysis?:
- Type [Y/N]: Y
-
-* Snaq-seq is preparing to launch... 
-```
-
 #### Reference amplicon:
 
-The reference amplicon is required to be provided in fasta format. This is to be used to generate the basechange data for the analysis.
+The basechange amplicon is required to be provided in txt format. The preliminary step includes how to generate it.
 
 #### Adjustment amplicon:
 
-The adjustment amplicon is required to be provided in tab seperated format used to generate result values in the output.
+The adjustment (normalization) amplicon is required to be provided in tab seperated format used to generate result values in the output.
 
 ## <a name="usage-options"></a> Usage-
 
@@ -101,53 +56,54 @@ For information about usage and options, run ```bash snaq-seq.sh -h```:
 All options are required to run the analysis.
 
 ```
-
-$ bash snaq-seq.sh -h 
-
+$ bash snaq-seq.sh -h
+ 
      Snaq-Seq: QC for viral surveillance NGS testing.     
 
-Usage: bash snaq-seq.sh /home/input/fastq /home/output /home/input/reference_genome.fasta /home/input/reference_amplicon.fasta /home/input/amplicon_adjustment.txt 60 1 1 0 300 300
+Usage: bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300
 
 Options:
 
-There are a total of 11 options (2 filepaths, 3 filenames, 6 integer values) to be provided in the following order on the command line:
+There are a total of 15 options (3 filepaths, 2 filenames, 10 integer values) to be provided in the following order on the command line:
  
-1)  Fastq path:                  	Location path of the fastq files (folder should only consist of fastq input).
-2)  Output path:                        Location path of folder to place analysis outputs.
-3)  Reference genome file:       	Location file path of reference genome (fasta format).
-4)  Reference amplicon fasta file:      Location file path of reference amplicon (fasta format). This is to create the basechange file required for QC.
-5)  IS amplicon adjustment file:        Location file path of IS amplicon adjustment file (tab seperated format).
-6)  Minimum fragment size:              Minimum fragment size (integer value).
-7)  RC:                                 RC (integer value).
-8)  Mapping quality                     Mapping quality (integer value).
-9)  QC:                                 QC cutoff (integer value).
-10) CC:                                 Complexity control copies (integer value).
-11) IS:                                 Internal standards (integer value).
+1)  input=                  Location folder path to fastq files (folder should only consist of fastq input).
+2)  output=                 Location folder path to place analysis outputs.
+3)  rg=       	            Location folder path of reference genome (fasta format) and bwa indices.
+4)  bc=                     Location file path of basechange file.
+5)  norm=                   Location file path of IS amplicon adjustment (normalization) file (tab seperated format).
+6)  outputSAM=              Alignment output in SAM format (0=False, 1=True) (integer value).
+7)  ofsCutoff=              offspring Cutoff (integer value).
+8)  mfs=                    Minimum fragment size (integer value).
+9)  RC=                     RC (integer value).
+10) mapq=                   Mapping quality (integer value).
+11) qCutoff=                QC cutoff (integer value).
+12) gbc=                    basechange (integer value).
+13) outputIS=               Include IS sequences in fastq output (integer value).
+14) CC=                     Complexity control copies (integer value).
+15) IS=                     Internal standards (integer value).
+
 ```
 
-Snaq-seq will ask to verify if the options were provided appropriately before proceeding.
+Snaq-seq will  verify if the options were provided appropriately before proceeding.
 
 ```
-
-$ bash snaq-seq.sh /home/input/fastq /home/output /home/input/reference_genome.fasta /home/input/reference_amplicon.fasta /home/input/amplicon_adjustment.txt 60 1 1 0 300 300
+$ bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300
 
 ... 
 
-Gathering options... 
-Fastq path: /home/input/fastq
-Output path: /home/output
-Reference genome file: /home/input/reference_genome.fasta
-Reference amplicon file: /home/input/reference_amplicon.fasta
-IS amplicon file: /home/input/amplicon_adjustment.txt
-Minimum fragment size: 60
-RC: 1
-Mapping quality: 1
-QC: 0
-CC: 300
-IS: 300 
-
-
-  * Please review the options provided above. 
- All of the options are required for the analysis, are they specified and indicated in the correct order? 
-  Type [Y/N]: 
+input=/home/input/fastq
+output=/home/output
+rg=/home/input/reference_genome.fasta
+bc=/home/input/amplicon_basechange.txt
+norm=/home/input/normalization.txt
+outputSAM=0
+ofsCutoff=0.01
+mfs=0
+RC=1
+mapq=-1
+qCutoff=0
+gbc=1
+outputIS=0
+CC=300
+IS=300 
 ```
