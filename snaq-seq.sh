@@ -9,23 +9,27 @@ Help()
    echo " "
    echo "     Snaq-Seq: QC for viral surveillance NGS testing.     "
    echo
-   echo "Usage: bash snaq-seq.sh /home/input/fastq /home/output /home/input/reference_genome.fasta /home/input/reference_amplicon.fasta /home/input/amplicon_adjustment.txt 60 1 1 0 300 300"
+   echo "Usage: bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/ref bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300"
    echo
    echo "Options:"
    echo
-   echo "There are a total of 11 options (2 filepaths, 3 filenames, 6 integer values) to be provided in the following order on the command line:"
+   echo "There are a total of 15 options (3 filepaths, 2 filenames, 10 integer values) to be provided in the following order on the command line:"
    echo " "
-   echo "1)  Fastq path:                  	Location path of the fastq files (folder should only consist of fastq input)."
-   echo "2)  Output path:                        Location path of folder to place analysis outputs."
-   echo "3)  Reference genome file:       	Location file path of reference genome (fasta format)."
-   echo "4)  Reference amplicon file:      Location file path of reference amplicon (fasta format). This is to create the basechange file required for QC."
-   echo "5)  IS amplicon adjustment file:        Location file path of IS amplicon adjustment file (tab seperated format)."
-   echo "6)  Minimum fragment size:              Minimum fragment size (integer value)."
-   echo "7)  RC:                                 RC (integer value)."
-   echo "8)  Mapping quality                     Mapping quality (integer value)."
-   echo "9)  QC:                                 QC cutoff (integer value)."
-   echo "10) CC:                                 Complexity control copies (integer value)."
-   echo "11) IS:                                 Internal standards (integer value)."
+   echo "1)  input=                  Location folder path to fastq files (folder should only consist of fastq input)."
+   echo "2)  output=                 Location folder path to place analysis outputs."
+   echo "3)  rg=       	            Location folder path of reference genome (fasta format) and bwa indices."
+   echo "4)  bc=                     Location file path of basechange file."
+   echo "5)  norm=                   Location file path of IS amplicon adjustment (normalization) file (tab seperated format)."
+   echo "6)  outputSAM=              Alignment output in SAM format (0=False, 1=True) (integer value)."
+   echo "7)  ofsCutoff=              offspring Cutoff (integer value)."
+   echo "8)  mfs=                    Minimum fragment size (integer value)."
+   echo "9)  RC=                     RC (integer value)."
+   echo "10) mapq=                   Mapping quality (integer value)."
+   echo "11) qCutoff=                QC cutoff (integer value)."
+   echo "12) gbc=                    basechange (integer value)."
+   echo "13) outputIS=               Include IS sequences in fastq output (integer value)."
+   echo "14) CC=                     Complexity control copies (integer value)."
+   echo "15) IS=                     Internal standards (integer value)."
    echo
 }
 while getopts ":h" option; do
@@ -48,7 +52,7 @@ if [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then
     user_os="Linux"
         printf "\n\nLinux system verified...\n\n"
 else
-        printf "** [ERROR] - This script only supports Linux systems.\n\t Please run this script on a Linux environment. \n"
+        printf "** [ERROR] - Snaq-seq only supports Linux systems.\n\t Please run snaq-seq on a Linux environment. \n"
         exit 1
 fi
 
@@ -69,78 +73,34 @@ fi
 
 
 
-# Gather options.
-echo -e "\nGathering options... \n";
-echo "Fastq path: $1";
-echo "Output path: $2";
-echo "Reference genome file: $3";
-echo "Reference amplicon file: $4";
-echo "IS amplicon file: $5";
-echo "Minimum fragment size: $6";
-echo "RC: $7";
-echo "Mapping quality: $8";
-echo "QC: $9";
-echo "CC: ${10}";
-echo -e "IS: ${11} \n";
+# Gather options and verify user options
+echo -e "\nGathering options...Verify user options... \n";
+echo "$1";
+echo "$2";
+echo "$3";
+echo "$4";
+echo "$5";
+echo "$6";
+echo "$7";
+echo "$8";
+echo "$9";
+echo "${10}";
+echo "${11}";
+echo "${12}";
+echo "${13}";
+echo "${14}";
+echo -e "${15} \n";
+
+input=$(echo ${1} |sed 's/.*=//g')
+output=$(echo ${2} |sed 's/.*=//g')
+ref=$(echo ${3} |sed 's/.*=//g')
+bc_amp=$(echo ${4} |sed 's/.*=//g')
+norm_amp=$(echo ${5} |sed 's/.*=//g')
 
 
-# Verify user options.
-while true; do
-        printf "\n * Please review the options provided above. \n All of the options are required for the analysis, are they specified and indicated in the correct order? \n "
-        read -r -p " Type [Y/N]: " yn
-        yn=$(echo $(echo -e "$yn" | tr -d '[:space:]'))
-        if [ "$yn" = "Y" ] || [ "$yn" = "y" ]; then
-                break
-	elif [ "$yn" = "N" ] || [ "$yn" = "N" ]; then
-		printf "\n * Please run 'snaq-seq.sh -h' for more information. * \n "
-        	exit 1
-	fi
-done
+# If options verified from user.
+docker run -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -v $input:/home/data/input  -v $output:/home/data/output  -v $ref:/home/data/ref  -v $bc_amp:/home/data/basechange/bc_amplicon.txt -v $norm_amp:/home/data/normalization/amplicon_adjustment.txt -ti accugenomics/snaq-seq:v1 
 
-# Request for genome indices.
-while true; do
-        printf "* Does your reference genome data include bwa indices? \nIf yes, please make sure they are located in the same folder where the reference genome is, the file path will be asked for. \nIf no, the analysis will build the bwa indices on the fly. \n "
-        read -r -p " Type [Y/N]: " ref_yn
-        ref_yn=$(echo $(echo -e "$ref_yn" | tr -d '[:space:]'))
-	        if [ "$ref_yn" = "Y" ] || [ "$ref_yn" = "y" ] || [ "$ref_yn" = "N" ] || [ "$ref_yn" = "n" ]; then
-                break
-        fi
-done
 
-# If genome indices available acquire from user. 
-if [ "$ref_yn" = "Y" ] || [ "$ref_yn" = "y" ]; then
-	while true; do
-		read -r -p "* Please provide the file path (no file names) of the indices location (reference genome must be located in same path): " user_indices
-                user_indices=$(echo $(echo -e "$user_indices" | tr -d '[:space:]'))
-                	if [ "$(echo -n $user_indices | tail -c 1)" = '/' ]; then
-                        	user_indices=$(echo "${user_indices}")
-			fi
-				break			
-	done
-fi 
 
-# If genome indices unavailable acquire response.
-if [ "$ref_yn" = "N" ] || [ "$ref_yn" = "n" ]; then
-	while true; do
-		printf "\n* Do you want to keep the bwa indices that will be generated for future analysis?:\n"
-        	read -r -p " Type [Y/N]: " yn_indices
-        	yn_indices=$(echo $(echo -e "$yn_indices" | tr -d '[:space:]'))	
-			break
-	done
-fi
-
-genome_prefix=$(echo ${3} | sed 's/\//\t/g' | sed 's/\t/\n/g'| tail -1)
-
-# If options verified and genome indices made available from user.
-if [ "$yn" = "Y" ] || [ "$yn" = "y" ] && [ "$ref_yn" = "Y" ] || [ "$ref_yn" = "y" ] ; then
-	printf "\n* Snaq-seq is preparing to launch... \n\n"
-	docker run  -e mfs="$6" -e rc="$7" -e mpq="$8" -e qc="$9" -e cc="${10}" -e is=${11} -e ref_yn=$ref_yn -e genome_prefix=$genome_prefix -v $1:/home/data/input  -v $2:/home/data/output -v $user_indices:/home/data/ref -v $3:/home/data/ref_backup/genome.fasta  -v $4:/home/data/basechange/reference_amplicon.fasta -v $5:/home/data/normalization/amplicon_adjustment.txt -ti accugenomics/snaq-seq:v1 bash /snaq-seq/init.sh
-
-# If options verified and genome indices not made avaialble from user.
-	elif [ "$yn" = "Y" ] || [ "$yn" = "y" ] && [ "$ref_yn" = "N" ] || [ "$ref_yn" = "N" ] ; then
-        printf "\n* Snaq-seq is preparing to launch... \n\n"
-	docker run  -e mfs="$6" -e rc="$7" -e mpq="$8" -e qc="$9" -e cc="${10}" -e is=${11} -e ref_yn=$ref_yn -e yn=$yn_indices  -v $1:/home/data/input  -v $2:/home/data/output -v $3:/home/data/ref/genome.fasta  -v $4:/home/data/basechange/reference_amplicon.fasta -v $5:/home/data/normalization/amplicon_adjustment.txt -ti accugenomics/snaq-seq:v1   bash /snaq-seq/init.sh
-	
-
-fi
 
