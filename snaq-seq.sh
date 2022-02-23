@@ -9,15 +9,15 @@ Help()
    echo " "
    echo "     Snaq-Seq: QC for viral surveillance NGS testing.     "
    echo
-   echo "Usage: bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/ref bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300"
+   echo "Usage: bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300"
    echo
    echo "Options:"
    echo
-   echo "There are a total of 15 options (3 filepaths, 2 filenames, 10 integer values) to be provided in the following order on the command line:"
+   echo "There are a total of 15 options (2 filepaths, 3 filenames, 10 integer values) to be provided in the following order on the command line:"
    echo " "
    echo "1)  input=                  Location folder path to fastq files (folder should only consist of fastq input)."
    echo "2)  output=                 Location folder path to place analysis outputs."
-   echo "3)  rg=       	            Location folder path of reference genome (fasta format) and bwa indices."
+   echo "3)  rg=       	            Location file path of reference genome (fasta format). The path must include bwa indices."
    echo "4)  bc=                     Location file path of basechange file."
    echo "5)  norm=                   Location file path of IS amplicon adjustment (normalization) file (tab seperated format)."
    echo "6)  outputSAM=              Alignment output in SAM format (0=False, 1=True) (integer value)."
@@ -96,10 +96,12 @@ output=$(echo ${2} |sed 's/.*=//g')
 ref=$(echo ${3} |sed 's/.*=//g')
 bc_amp=$(echo ${4} |sed 's/.*=//g')
 norm_amp=$(echo ${5} |sed 's/.*=//g')
+genome_fasta=$(echo ${3} | sed 's@.*/@@')
+genome_path=$(echo ${3} | sed 's/\/[^/]*$/\//')
 
 
 # If options verified from user.
-docker run -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -v $input:/home/data/input  -v $output:/home/data/output  -v $ref:/home/data/ref  -v $bc_amp:/home/data/basechange/bc_amplicon.txt -v $norm_amp:/home/data/normalization/amplicon_adjustment.txt -ti accugenomics/snaq-seq:v1 
+docker run -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -v $input:/home/data/input  -v $output:/home/data/output  -v $genome_path:/home/data/ref-v $genome_fasta  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:v1 
 
 
 
