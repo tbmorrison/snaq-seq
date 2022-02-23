@@ -60,7 +60,7 @@ $ bash snaq-seq.sh -h
  
      Snaq-Seq: QC for viral surveillance NGS testing.     
 
-Usage: bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/ref bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300
+Usage: bash snaq-seq.sh input=/home/input/fastq/ output=/home/output rg=/home/input/ref/genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300
 
 Options:
 
@@ -68,7 +68,7 @@ There are a total of 15 options (3 filepaths, 2 filenames, 10 integer values) to
  
 1)  input=                  Location folder path to fastq files (folder should only consist of fastq input).
 2)  output=                 Location folder path to place analysis outputs.
-3)  rg=       	            Location folder path of reference genome (fasta format) and bwa indices.
+3)  rg=       	            Location file path of reference genome (fasta format). The path must include bwa indices.
 4)  bc=                     Location file path of basechange file.
 5)  norm=                   Location file path of IS amplicon adjustment (normalization) file (tab seperated format).
 6)  outputSAM=              Alignment output in SAM format (0=False, 1=True) (integer value).
@@ -87,13 +87,13 @@ There are a total of 15 options (3 filepaths, 2 filenames, 10 integer values) to
 Snaq-seq will  verify if the options were provided appropriately before proceeding.
 
 ```
-$ bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/ref bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300
+$ bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/ref/genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300
 
 ... 
 
 input=/home/input/fastq
 output=/home/output
-rg=/home/input/reference
+rg=/home/input/reference/genome.fasta
 bc=/home/input/amplicon_basechange.txt
 norm=/home/input/normalization.txt
 outputSAM=0
