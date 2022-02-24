@@ -72,7 +72,7 @@ There are a total of 15 options (3 filepaths, 2 filenames, 10 integer values) to
 4)  bc=                     Location file path of basechange file.
 5)  norm=                   Location file path of IS amplicon adjustment (normalization) file (tab seperated format).
 6)  outputSAM=              Alignment output in SAM format (0=False, 1=True) (integer value).
-7)  ofsCutoff=              offspring Cutoff (integer value).
+7)  ofsCutoff=              offspring Cutoff (float value).
 8)  mfs=                    Minimum fragment size (integer value).
 9)  RC=                     RC (integer value).
 10) mapq=                   Mapping quality (integer value).
