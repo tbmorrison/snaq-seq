@@ -96,12 +96,12 @@ output=$(echo ${2} |sed 's/.*=//g')
 ref=$(echo ${3} |sed 's/.*=//g')
 bc_amp=$(echo ${4} |sed 's/.*=//g')
 norm_amp=$(echo ${5} |sed 's/.*=//g')
-genome_fasta=$(echo ${3} | sed 's@.*/@@')
-genome_path=$(echo ${3} | sed 's/\/[^/]*$/\//')
+genome_fasta=$(echo ${ref} | sed 's@.*/@@')
+genome_path=$(echo ${ref} | sed 's/\/[^/]*$/\//')
 
 
 # If options verified from user.
-docker run -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -v $input:/home/data/input  -v $output:/home/data/output  -v $genome_path:/home/data/ref-v $genome_fasta  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:v1 
+docker run -e genome_fasta="$genome_fasta" -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -v $input:/home/data/input  -v $output:/home/data/output  -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:v1 
 
 
 
