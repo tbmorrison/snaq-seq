@@ -9,27 +9,35 @@ Help()
    echo " "
    echo "     Snaq-Seq: QC for viral surveillance NGS testing.     "
    echo
-   echo "Usage: bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300"
+   echo FOLDER Usage:
+   echo
+   echo "bash snaq-seq.sh inputDIR=/home/input/fastq/ output=/home/output/ rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300"
+   echo
+   echo SINGLE SAMPLE Usage:
+   echo
+   echo "bash snaq-seq.sh inputFILE=/home/input/fastq/foward_R1.fastq,/home/input/fastq/reverse_R2.fastq output=/home/output/ rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300"
    echo
    echo "Options:"
    echo
-   echo "There are a total of 15 options (2 filepaths, 3 filenames, 10 integer values) to be provided in the following order on the command line:"
+   echo "There are a total of 15 options (depending on the input option, at least 1 filepath(s), at least 3 filenames, 9 integer values, 1 float value) to be provided in the following order on the command line:"
    echo " "
-   echo "1)  input=                  Location folder path to fastq files (folder should only consist of fastq input)."
-   echo "2)  output=                 Location folder path to place analysis outputs."
-   echo "3)  rg=       	            Location file path of reference genome (fasta format). The path must include bwa indices."
-   echo "4)  bc=                     Location file path of basechange file."
-   echo "5)  norm=                   Location file path of IS amplicon adjustment (normalization) file (tab seperated format)."
-   echo "6)  outputSAM=              Alignment output in SAM format (0=False, 1=True) (integer value)."
-   echo "7)  ofsCutoff=              offspring Cutoff (integer value)."
-   echo "8)  mfs=                    Minimum fragment size (integer value)."
-   echo "9)  RC=                     RC (integer value)."
-   echo "10) mapq=                   Mapping quality (integer value)."
-   echo "11) qCutoff=                QC cutoff (integer value)."
-   echo "12) gbc=                    basechange (integer value)."
-   echo "13) outputIS=               Include IS sequences in fastq output (integer value)."
-   echo "14) CC=                     Complexity control copies (integer value)."
-   echo "15) IS=                     Internal standards (integer value)."
+   echo "1)  inputDIR=                  Location folder path to fastq files (folder should ONLY consist of fastq input)."
+   echo "                     OR                                                                                        "
+   echo	"    inputFILE=                 Location file path of forward AND reverse fastq files seperated by comma."			
+   echo "2)  output=                    Location folder path to place analysis outputs."
+   echo "3)  rg=       	               Location file path of reference genome (fasta format). The path must include bwa indices."
+   echo "4)  bc=                        Location file path of basechange file."
+   echo "5)  norm=                      Location file path of IS amplicon adjustment (normalization) file (tab seperated format)."
+   echo "6)  outputSAM=                 Alignment output in SAM format (0=False, 1=True) (integer value)."
+   echo "7)  ofsCutoff=                 offspring Cutoff (float value)."
+   echo "8)  mfs=                       Minimum fragment size (integer value)."
+   echo "9)  RC=                        RC (integer value)."
+   echo "10) mapq=                      Mapping quality (integer value)."
+   echo "11) qCutoff=                   QC cutoff (integer value)."
+   echo "12) gbc=                       basechange (integer value)."
+   echo "13) outputIS=                  Include IS sequences in fastq output (integer value)."
+   echo "14) CC=                        Complexity control copies (integer value)."
+   echo "15) IS=                        Internal standards (integer value)."
    echo
 }
 while getopts ":h" option; do
@@ -74,7 +82,7 @@ fi
 
 
 # Gather options and verify user options
-echo -e "\nGathering options...Verify user options... \n";
+echo -e "\nGathering options...Verifying user options... \n";
 echo "$1";
 echo "$2";
 echo "$3";
@@ -91,7 +99,12 @@ echo "${13}";
 echo "${14}";
 echo -e "${15} \n";
 
-input=$(echo ${1} |sed 's/.*=//g')
+input=$(echo ${1} | sed 's/=.*//g')
+inputDIR=$(echo ${1} |sed 's/.*=//g')
+inputFILE_fasta=$(echo ${1} | sed 's/.*=//g'| sed 's/,/\n/g' | head -1 | sed 's@.*/@@'| sed 's/_R1.*/_R1_*/g') 
+inputFILE_path=$(echo ${1} | sed 's/.*=//g'| sed 's/,/\n/g' | head -1 | sed 's/\/[^/]*$/\//')
+
+
 output=$(echo ${2} |sed 's/.*=//g')
 ref=$(echo ${3} |sed 's/.*=//g')
 bc_amp=$(echo ${4} |sed 's/.*=//g')
@@ -101,8 +114,15 @@ genome_path=$(echo ${ref} | sed 's/\/[^/]*$/\//')
 
 docker pull accugenomics/snaq-seq:v1
 
-# If options verified from user.
-docker run -e genome_fasta="$genome_fasta" -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -v $input:/home/data/input  -v $output:/home/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:v1 bash /snaq-seq/init.sh
+# If input is receiving directory and  options verified from user.
+if [ $input = "inputDIR" ] ; then 
+	docker run -e genome_fasta="$genome_fasta" -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -v $inputDIR:/home/data/input  -v $output:/home/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:v1 bash /snaq-seq/init-inputDIR.sh
+fi
+
+# If input is receiving single fastq set and options verified from user.
+if  [ $input = "inputFILE" ] ; then 
+	docker run -e inputFILE_fasta="$inputFILE_fasta" -e  genome_fasta="$genome_fasta"  -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -v $inputFILE_path:/home/data/input  -v $output:/home/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:v1 bash /snaq-seq/init-inputFILE.sh
+fi
 
 exit
 
