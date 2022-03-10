@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Author: "Thahmina A. Ali"
 
+# v 0.2 
+# - Wed Feb 9, 2022 
+# - update to include option for selecting Docker Hub container versions (tag) 
 
 #Display Help.
 Help()
@@ -11,21 +14,21 @@ Help()
    echo
    echo FOLDER Usage:
    echo
-   echo "bash snaq-seq.sh inputDIR=/home/input/fastq/ output=/home/output/ rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300"
+   echo "bash snaq-seq.sh inputDIR=/home/input/fastq/ output=/home/output/ rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1"
    echo
    echo SINGLE SAMPLE Usage:
    echo
-   echo "bash snaq-seq.sh inputFILE=/home/input/fastq/foward_R1.fastq,/home/input/fastq/reverse_R2.fastq output=/home/output/ rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300"
+   echo "bash snaq-seq.sh inputFILE=/home/input/fastq/foward_R1.fastq,/home/input/fastq/reverse_R2.fastq output=/home/output/ rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1"
    echo
    echo "Options:"
    echo
-   echo "There are a total of 15 options (depending on the input option, at least 1 filepath(s), at least 3 filenames, 9 integer values, 1 float value) to be provided in the following order on the command line:"
+   echo "There are a total of 16 options (depending on the input option, at least 1 filepath(s), at least 3 filenames, 9 integer values, 1 float value) to be provided in the following order on the command line:"
    echo " "
    echo "1)  inputDIR=                  Location folder path to fastq files (folder should ONLY consist of fastq input)."
    echo "                     OR                                                                                        "
    echo	"    inputFILE=                 Location file path of forward AND reverse fastq files seperated by comma."			
    echo "2)  output=                    Location folder path to place analysis outputs."
-   echo "3)  rg=       	               Location file path of reference genome (fasta format). The path must include bwa indices."
+   echo "3)  rg=       	                Location file path of reference genome (fasta format). The path must include bwa indices."
    echo "4)  bc=                        Location file path of basechange file."
    echo "5)  norm=                      Location file path of IS amplicon adjustment (normalization) file (tab seperated format)."
    echo "6)  outputSAM=                 Alignment output in SAM format (0=False, 1=True) (integer value)."
@@ -38,6 +41,7 @@ Help()
    echo "13) outputIS=                  Include IS sequences in fastq output (integer value)."
    echo "14) CC=                        Complexity control copies (integer value)."
    echo "15) IS=                        Internal standards (integer value)."
+   echo "16) VERSION=                   v1 (latest version)."
    echo
 }
 while getopts ":h" option; do
@@ -79,8 +83,6 @@ else
 	   printf "Docker application verified... \n"
 fi
 
-
-
 # Gather options and verify user options
 echo -e "\nGathering options...Verifying user options... \n";
 echo "$1";
@@ -97,7 +99,8 @@ echo "${11}";
 echo "${12}";
 echo "${13}";
 echo "${14}";
-echo -e "${15} \n";
+echo "${15}";
+echo -e "${16} \n";
 
 option0=$(echo ${0})
 option1=$(echo ${1})
@@ -115,6 +118,7 @@ option12=$(echo ${12})
 option13=$(echo ${13})
 option14=$(echo ${14})
 option15=$(echo ${15})
+option16=$(echo ${16})
 
 input=$(echo ${1} | sed 's/=.*//g')
 inputDIR=$(echo ${1} |sed 's/.*=//g')
@@ -129,18 +133,37 @@ norm_amp=$(echo ${5} |sed 's/.*=//g')
 genome_fasta=$(echo ${ref} | sed 's@.*/@@')
 genome_path=$(echo ${ref} | sed 's/\/[^/]*$/\//')
 
-docker pull accugenomics/snaq-seq:v1
+
+# Get array of tags for accugenomics/snaq-seq
+tags=`wget -q https://registry.hub.docker.com/v1/repositories/accugenomics/snaq-seq/tags -O - | sed -e 's/[][]//g' -e 's/[{}]//g' -e 's/"//g' -e 's/layer: //g' -e 's/name: //g'`
+tags_arr=($(echo "$tags" | tr ',' '\n'))
+tag_sel=$(echo ${16} | sed 's/VERSION=//g')
+
+if [ ${tag_sel} = "v1" ];  then
+    pull_cmd="docker pull accugenomics/snaq-seq:$tag_sel"
+    eval $pull
+elif [[ ! ${tags_arr[*]} =~ $tag_sel ]]; then
+    printf "** [ERROR] - Selected VERSION not found in Docker Hub. Available versions are: **\n"
+        for i in "${tags_arr[@]}"
+        do
+            echo "$i"
+        done
+    exit 1
+else    
+    pull_cmd="docker pull accugenomics/snaq-seq:$tag_sel"
+    eval $pull_cmd
+fi
 
 # If input is receiving directory and  options verified from user.
 if [ $input = "inputDIR" ] ; then 
-	docker run -e inputDIR="$inputDIR" -e genome_fasta="$genome_fasta" -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}  -e cc="${14}" -e is=${15} -e option0=$option0 -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15  -v $inputDIR:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:v1 bash /snaq-seq/init-inputDIR.sh
+    docker run -e inputDIR="$inputDIR" -e genome_fasta="$genome_fasta" -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}  -e cc="${14}" -e is=${15} -e option0=$option0 -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15  -v $inputDIR:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:$tag_sel #bash /snaq-seq/init-inputDIR.sh
+	
 fi
 
 # If input is receiving single fastq set and options verified from user.
 if  [ $input = "inputFILE" ] ; then 
-	docker run -e inputFILE_fasta="$inputFILE_fasta" -e  genome_fasta="$genome_fasta"  -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15 -v $inputFILE_path:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:v1 bash /snaq-seq/init-inputFILE.sh
+    docker run -e inputFILE_fasta="$inputFILE_fasta" -e  genome_fasta="$genome_fasta"  -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15 -v $inputFILE_path:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:$tag_sel #bash /snaq-seq/init-inputFILE.sh
 fi
 
 exit
-
 
