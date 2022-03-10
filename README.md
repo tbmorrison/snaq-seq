@@ -81,13 +81,14 @@ There are a total of 15 options (3 filepaths, 2 filenames, 10 integer values) to
 13) outputIS=               Include IS sequences in fastq output (integer value).
 14) CC=                     Complexity control copies (integer value).
 15) IS=                     Internal standards (integer value).
-
+15) IS=                     Internal standards (integer value).
+16) VERSION=                Docker container version (string value).
 ```
 
 Snaq-seq will  verify if the options were provided appropriately before proceeding.
 
 ```
-$ bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/ref/genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300
+$ bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/ref/genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1
 
 ... 
 
@@ -105,5 +106,6 @@ qCutoff=0
 gbc=1
 outputIS=0
 CC=300
-IS=300 
+IS=300
+VERSION=v1
 ```
