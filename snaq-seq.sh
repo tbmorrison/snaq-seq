@@ -122,7 +122,7 @@ option16=$(echo ${16})
 
 input=$(echo ${1} | sed 's/=.*//g')
 inputDIR=$(echo ${1} |sed 's/.*=//g')
-inputFILE_fasta=$(echo ${1} | sed 's/.*=//g'| sed 's/,/\n/g' | head -1 | sed 's@.*/@@' | sed 's/_R1.*//g') 
+inputFILE_fasta=$(echo ${1} | sed 's/.*=//g'| sed 's/,/\n/g' | head -1 | sed 's@.*/@@' | sed 's/_R.*//g') 
 inputFILE_path=$(echo ${1} | sed 's/.*=//g'| sed 's/,/\n/g' | head -1 | sed 's/\/[^/]*$/\//')
 
 
