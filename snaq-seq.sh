@@ -93,9 +93,9 @@ arg_1_option16=$(echo ${16} | sed 's/=.*/=/g')
 arg_2_option1=$(echo ${1} | sed 's/.*=//g')
 arg_2_option2=$(echo ${2} | sed 's/.*=//g')
 arg_2_option3=$(echo ${3} | sed 's/.*=//g' | sed 's/.*\.//g')
-arg_2_option4=$(echo ${4} | sed 's/.*=//g')
-arg_2_option5=$(echo ${5} | sed 's/.*=//g')
-arg_2_option6=$(echo ${6} | sed 's/.*=//g')
+arg_2_option4=$(echo ${4} | sed 's/.*=//g' | sed 's/.*\.//g' )
+arg_2_option5=$(echo ${5} | sed 's/.*=//g' | sed 's/.*\.//g' )
+arg_2_option6=$(echo ${6} | sed 's/.*=//g' ) 
 arg_2_option7=$(echo ${7} | sed 's/.*=//g')
 arg_2_option8=$(echo ${8} | sed 's/.*=//g')
 arg_2_option9=$(echo ${9} | sed 's/.*=//g')
@@ -146,7 +146,7 @@ if [[ ! "$arg_1_option5" == "norm=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'norm=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ "$arg_1_option5" == "bc=" ] && [ "$arg_2_option5" == "txt" ]; then
+elif [ "$arg_1_option5" == "norm=" ] && [ "$arg_2_option5" == "txt" ]; then
         output=true
 else
         output=false
