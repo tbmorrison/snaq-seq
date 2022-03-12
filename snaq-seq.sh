@@ -120,6 +120,24 @@ option14=$(echo ${14})
 option15=$(echo ${15})
 option16=$(echo ${16})
 
+parameters=($1,$2,$3,$4,$5,$6,$7,$8,$9,${10},${11},${12},${13},${14},${15},${16})
+IFS=','
+for parameter in ${parameters[@]}; do
+    IFS="=" read -r key value <<< $parameter
+    if test -z "$value"; then
+
+        echo "FATAL ERROR: $key is empty"
+        Help
+        exit 1
+    fi
+done
+
+if test -z "$option16"; then
+    echo "FATAL ERROR: Missing argument"
+    Help
+    exit 2
+fi
+
 input=$(echo ${1} | sed 's/=.*//g')
 inputDIR=$(echo ${1} |sed 's/.*=//g')
 inputFILE_fasta=$(echo ${1} | sed 's/.*=//g'| sed 's/,/\n/g' | head -1 | sed 's@.*/@@' | sed 's/_R.*//g') 
