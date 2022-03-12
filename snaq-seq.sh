@@ -122,7 +122,10 @@ if [[ ! "$arg_1_option3" == "rg=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'rg=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ "$arg_1_option3" == "rg=" ] && [ "$arg_2_option3" == "fasta" ] || [ "$arg_1_option3" == "rg=" ] && [ "$arg_2_option3" == "fa" ] ; then
+elif [ "$arg_1_option3" == "rg=" ] && [ "$arg_2_option3" == "fasta" ] ; then
+        output=true
+
+elif[ "$arg_1_option3" == "rg=" ] && [ "$arg_2_option3" == "fa" ] ; then
         output=true
 else
 	output=false
