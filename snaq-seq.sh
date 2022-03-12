@@ -90,12 +90,12 @@ arg_1_option14=$(echo ${14} | sed 's/=.*/=/g')
 arg_1_option15=$(echo ${15} | sed 's/=.*/=/g')
 arg_1_option16=$(echo ${16} | sed 's/=.*/=/g')
 
-arg_2_option1=$(echo ${1} | sed 's/.*=//g')
-arg_2_option2=$(echo ${2} | sed 's/.*=//g')
-arg_2_option3=$(echo ${3} | sed 's/.*=//g' | sed 's/.*\.//g')
-arg_2_option4=$(echo ${4} | sed 's/.*=//g' | sed 's/.*\.//g' )
-arg_2_option5=$(echo ${5} | sed 's/.*=//g' | sed 's/.*\.//g' )
-arg_2_option6=$(echo ${6} | sed 's/.*=//g' ) 
+arg_2_option1=$(echo ${1} | sed 's/.*\.//g')
+arg_2_option2=$(echo ${2} | sed 's/.*\.//g')
+arg_2_option3=$(echo ${3} | sed 's/.*\.//g')
+arg_2_option4=$(echo ${4} | sed 's/.*\.//g')
+arg_2_option5=$(echo ${5} | sed 's/.*\.//g')
+arg_2_option6=$(echo ${6} | sed 's/.*=//g') 
 arg_2_option7=$(echo ${7} | sed 's/.*=//g')
 arg_2_option8=$(echo ${8} | sed 's/.*=//g')
 arg_2_option9=$(echo ${9} | sed 's/.*=//g')
@@ -103,7 +103,7 @@ arg_2_option10=$(echo ${10} | sed 's/.*=//g')
 arg_2_option11=$(echo ${11} | sed 's/.*=//g')
 arg_2_option12=$(echo ${12} | sed 's/.*=//g')
 arg_2_option13=$(echo ${13} | sed 's/.*=//g')
-arg_2_option14=$(echo ${14} | sed 's/.*=//g')
+arg_2_option14=$(echo ${14} | sed 's/.*=//g') 
 arg_2_option15=$(echo ${15} | sed 's/.*=//g')
 arg_2_option16=$(echo ${16} | sed 's/.*=//g')
 
@@ -161,11 +161,129 @@ if [[ ! "$arg_1_option6" == "outputSAM=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'outputSAM=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ "$arg_1_option6" == "outputSAM=" ] && [ "$arg_2_option6" == "0" ] || [ "$arg_1_option6" == "outputSAM=" ] && [ "$arg_2_option6" == "1" ]  ; then
+elif [ "$arg_1_option6" == "outputSAM=" ] && [ "$arg_2_option6" == "0" ]; then
+        output=true
+elif [ "$arg_1_option6" == "outputSAM=" ] && [ "$arg_2_option6" == "1" ]; then
         output=true
 else
         output=false
 	echo -e "***\n [ERROR] - The outputSAM value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+fi
+
+
+
+if [[ ! "$arg_1_option7" == "ofsCutoff=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'ofsCutoff=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option7" == "mfs=" ] && [[ ! "$arg_2_option7" =~ ^[0-9]+$ ]]; then
+        output=true
+else
+        output=false
+        echo -e "***\n [ERROR] - The ofsCutoff value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+fi
+
+if [[ ! "$arg_1_option8" == "mfs=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'mfs=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option8" == "mfs=" ] && [[  "$arg_2_option8" =~ ^[0-9]+$ ]]; then
+        output=true
+else
+        output=false
+        echo -e "***\n [ERROR] - The mfs value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+fi
+
+
+if [[ ! "$arg_1_option9" == "RC=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'RC=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option9" == "RC=" ] && [[  "$arg_2_option9" =~ ^[0-9]+$ ]]; then
+        output=true
+else
+        output=false
+        echo -e "***\n [ERROR] - The RC value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+fi
+
+
+
+if [[ ! "$arg_1_option10" == "mapq=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'mapq=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option10" == "mapq=" ] && [[  "$arg_2_option10" =~ ^[0-9]+$ ]]; then
+        output=true
+else
+        output=false
+        echo -e "***\n [ERROR] - The mapq value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+fi
+
+if [[ ! "$arg_1_option11" == "qCutoff=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'qCutoff=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option11" == "qCutoff=" ] && [[  "$arg_2_option11" =~ ^[0-9]+$ ]]; then
+        output=true
+else
+        output=false
+        echo -e "***\n [ERROR] - The qCutoff value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+fi
+
+
+if [[ ! "$arg_1_option12" == "gbc=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'gbc=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option12" == "gbc=" ] && [[  "$arg_2_option12" =~ ^[0-9]+$ ]]; then
+        output=true
+else
+        output=false
+        echo -e "***\n [ERROR] - The gbc value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+fi
+
+if [[ ! "$arg_1_option13" == "outputIS=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'outputIS=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option13" == "outputIS=" ] && [ "$arg_2_option13" == "0" ]; then
+        output=true
+elif [ "$arg_1_option13" == "outputIS=" ] && [ "$arg_2_option13" == "1" ]; then
+        output=true
+else
+        output=false
+        echo -e "***\n [ERROR] - The outputIS value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+fi
+
+if [[ ! "$arg_1_option14" == "CC=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'CC=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option14" == "CC=" ] && [[  "$arg_2_option14" =~ ^[0-9]+$ ]]; then
+        output=true
+else
+        output=false
+        echo -e "***\n [ERROR] - The CC value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+fi
+
+if [[ ! "$arg_1_option15" == "IS=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'IS=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option15" == "IS=" ] && [[  "$arg_2_option15" =~ ^[0-9]+$ ]]; then
+        output=true
+else
+        output=false
+        echo -e "***\n [ERROR] - The IS value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
 fi
 
