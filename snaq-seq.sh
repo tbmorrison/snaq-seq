@@ -59,6 +59,115 @@ if [ $# -eq "$NO_ARGS" ]; then
     exit 1
 fi
 
+# Handle more than 16 options.
+ARGS=16
+if [ $# -gt "$ARGS" ]; then
+    echo "\n *** [ERROR] -  Too many options were provided. Please run 'snaq-seq.sh -h' for more information. *** \n"
+    exit 1
+fi
+
+# Handle less than 16 option.
+ARGS=16
+if [ $# -lt "$ARGS" ]; then
+    echo "***\n [ERROR] - Wrong number of options were provided. Please run 'snaq-seq.sh -h' for more information. *** \n"
+    exit 1
+fi
+
+arg_1_option1=$(echo ${1} | sed 's/=.*/=/g')
+arg_1_option2=$(echo ${2} | sed 's/=.*/=/g')
+arg_1_option3=$(echo ${3} | sed 's/=.*/=/g')
+arg_1_option4=$(echo ${4} | sed 's/=.*/=/g')
+arg_1_option5=$(echo ${5} | sed 's/=.*/=/g')
+arg_1_option6=$(echo ${6} | sed 's/=.*/=/g')
+arg_1_option7=$(echo ${7} | sed 's/=.*/=/g')
+arg_1_option8=$(echo ${8} | sed 's/=.*/=/g')
+arg_1_option9=$(echo ${9} | sed 's/=.*/=/g')
+arg_1_option10=$(echo ${10} | sed 's/=.*/=/g')
+arg_1_option11=$(echo ${11} | sed 's/=.*/=/g')
+arg_1_option12=$(echo ${12} | sed 's/=.*/=/g')
+arg_1_option13=$(echo ${13} | sed 's/=.*/=/g')
+arg_1_option14=$(echo ${14} | sed 's/=.*/=/g')
+arg_1_option15=$(echo ${15} | sed 's/=.*/=/g')
+arg_1_option16=$(echo ${16} | sed 's/=.*/=/g')
+
+arg_2_option1=$(echo ${1} | sed 's/.*=//g')
+arg_2_option2=$(echo ${2} | sed 's/.*=//g')
+arg_2_option3=$(echo ${3} | sed 's/.*=//g' | sed 's/.*\.//g')
+arg_2_option4=$(echo ${4} | sed 's/.*=//g')
+arg_2_option5=$(echo ${5} | sed 's/.*=//g')
+arg_2_option6=$(echo ${6} | sed 's/.*=//g')
+arg_2_option7=$(echo ${7} | sed 's/.*=//g')
+arg_2_option8=$(echo ${8} | sed 's/.*=//g')
+arg_2_option9=$(echo ${9} | sed 's/.*=//g')
+arg_2_option10=$(echo ${10} | sed 's/.*=//g')
+arg_2_option11=$(echo ${11} | sed 's/.*=//g')
+arg_2_option12=$(echo ${12} | sed 's/.*=//g')
+arg_2_option13=$(echo ${13} | sed 's/.*=//g')
+arg_2_option14=$(echo ${14} | sed 's/.*=//g')
+arg_2_option15=$(echo ${15} | sed 's/.*=//g')
+arg_2_option16=$(echo ${16} | sed 's/.*=//g')
+
+
+if [[ ! "$arg_1_option2" == "output=" ]]; then
+	output=false
+	echo -e "***\n [ERROR] - The 'output=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+    	exit 1
+else 
+	if [ "$arg_1_option2" == "output=" ] && [ -d "$arg_2_option2" ]; then
+	output=true	
+	fi
+fi
+
+if [[ ! "$arg_1_option3" == "rg=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'rg=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option3" == "rg=" ] && [ "$arg_2_option3" == "fasta" ] || [ "$arg_1_option3" == "rg=" ] && [ "$arg_2_option3" == "fa" ] ; then
+        output=true
+else
+	output=false
+	echo -e "***\n [ERROR] - The genome file type is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+	exit 1
+fi
+
+if [[ ! "$arg_1_option4" == "bc=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'bc=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option4" == "bc=" ] && [ "$arg_2_option4" == "txt" ]; then
+        output=true
+else
+        output=false
+        echo -e "***\n [ERROR] - The basechange file type is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+fi
+
+if [[ ! "$arg_1_option5" == "norm=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'norm=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option5" == "bc=" ] && [ "$arg_2_option5" == "txt" ]; then
+        output=true
+else
+        output=false
+        echo -e "***\n [ERROR] - The normalization file type is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+fi
+
+
+if [[ ! "$arg_1_option6" == "outputSAM=" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'outputSAM=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ "$arg_1_option6" == "outputSAM=" ] && [ "$arg_2_option6" == "0" ] || [ "$arg_1_option6" == "outputSAM=" ] && [ "$arg_2_option6" == "1" ]  ; then
+        output=true
+else
+        output=false
+	echo -e "***\n [ERROR] - The outputSAM value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+fi
+
+
 # Verify Linux environment.
 if [ "$(expr substr $(uname -s) 1 5)" = "Linux" ]; then
     user_os="Linux"
@@ -141,7 +250,7 @@ tag_sel=$(echo ${16} | sed 's/VERSION=//g')
 
 if [ ${tag_sel} = "v1" ];  then
     pull_cmd="docker pull accugenomics/snaq-seq:$tag_sel"
-    eval $pull
+    eval $pull_cmd
 elif [[ ! ${tags_arr[*]} =~ $tag_sel ]]; then
     printf "** [ERROR] - Selected VERSION not found in Docker Hub. Available versions are: **\n"
         for i in "${tags_arr[@]}"
