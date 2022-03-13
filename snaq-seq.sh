@@ -32,13 +32,13 @@ Help()
    echo "4)  bc=                        Location file path of basechange file."
    echo "5)  norm=                      Location file path of IS amplicon adjustment (normalization) file (tab seperated format)."
    echo "6)  outputSAM=                 Alignment output in SAM format (0=False, 1=True) (integer value)."
-   echo "7)  ofsCutoff=                 offspring Cutoff (0 1)."
+   echo "7)  ofsCutoff=                 offspring Cutoff (0 < ofsCutoff < 1)."
    echo "8)  mfs=                       Minimum fragment size (integer value)."
    echo "9)  RC=                        RC (integer value)."
-   echo "10) mapq=                      Mapping quality (integer value)."
+   echo "10) mapq=                      Mapping quality (accepts both positive and negative integer values)."
    echo "11) qCutoff=                   QC cutoff (integer value)."
    echo "12) gbc=                       basechange (integer value)."
-   echo "13) outputIS=                  Include IS sequences in fastq output (integer value)."
+   echo "13) outputIS=                  Include IS sequences in fastq output (0=False, 1=True) (integer value)."
    echo "14) CC=                        Complexity control copies (integer value)."
    echo "15) IS=                        Internal standards (integer value)."
    echo "16) VERSION=                   v1 (latest version)."
@@ -242,7 +242,7 @@ if [[ ! "$arg_1_option10" == "mapq=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'mapq=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ "$arg_1_option10" == "mapq=" ] && [[  "$arg_2_option10" =~ ^[-?][0-9]+$ ]]; then
+elif [ "$arg_1_option10" == "mapq=" ] && [[  "$arg_2_option10" =~ ^-?[0-9]+$ ]]; then
         output=true
 else
         output=false
