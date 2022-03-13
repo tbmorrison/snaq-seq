@@ -90,7 +90,10 @@ arg_1_option14=$(echo ${14} | sed 's/=.*/=/g')
 arg_1_option15=$(echo ${15} | sed 's/=.*/=/g')
 arg_1_option16=$(echo ${16} | sed 's/=.*/=/g')
 
-arg_2_option1=$(echo ${1} | sed 's/.*\.//g')
+arg_2_option1=$(echo ${1} | sed 's/.*=//g')
+arg_3_option1=$(echo ${1} | sed 's/.*\.//g')
+arg_4_option1=$(echo ${1} | sed 's/.*\.//g')
+
 arg_2_option2=$(echo ${2} | sed 's/.*\.//g')
 arg_2_option3=$(echo ${3} | sed 's/.*\.//g')
 arg_2_option4=$(echo ${4} | sed 's/.*\.//g')
@@ -106,6 +109,28 @@ arg_2_option13=$(echo ${13} | sed 's/.*=//g')
 arg_2_option14=$(echo ${14} | sed 's/.*=//g') 
 arg_2_option15=$(echo ${15} | sed 's/.*=//g')
 arg_2_option16=$(echo ${16} | sed 's/.*=//g')
+
+
+
+if [ "$arg_1_option1" != "inputDIR=" ]; then
+	if [  "$arg_1_option1" != "inputFILE=" ]; then
+	output=false
+	echo -e "***\n [ERROR] - The 'input' option is incorrect. Please run 'snaq-seq.sh -h' for more information on 'inputDIR' and 'inputFILE'. *** \n"
+        exit 1
+	fi
+elif [[  "$arg_1_option1" == "inputDIR=" ]]; then
+	if [[ ! -d "$arg_2_option1" ]]; then
+	output=false
+        echo -e "***\n [ERROR] - The 'inputDIR=' option is provided with no directory. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+	fi
+else
+	output=true
+#if [[ ! "$arg_1_option1" == "inputFILE=" ]] && [[ -d "$arg_1_option2" ]]; then
+#        output=false
+#fi
+
+fi
 
 
 if [[ ! "$arg_1_option2" == "output=" ]]; then
@@ -172,12 +197,11 @@ else
 fi
 
 
-
 if [[ ! "$arg_1_option7" == "ofsCutoff=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'ofsCutoff=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ "$arg_1_option7" == "mfs=" ] && [[ ! "$arg_2_option7" =~ ^[0-9]+$ ]]; then
+elif [ "$arg_1_option7" == "ofsCutoff=" ] && [[ ! "$arg_2_option7" =~ "^[0-9].*[0-9]$" ]] ; then
         output=true
 else
         output=false
@@ -185,11 +209,14 @@ else
         exit 1
 fi
 
+
+
+
 if [[ ! "$arg_1_option8" == "mfs=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'mfs=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ "$arg_1_option8" == "mfs=" ] && [[  "$arg_2_option8" =~ ^[0-9]+$ ]]; then
+elif [ "$arg_1_option8" == "mfs=" ] && [[ ! "$arg_2_option7" =~ "^[0-9].*[0-9]$" ]]; then
         output=true
 else
         output=false
@@ -209,7 +236,6 @@ else
         echo -e "***\n [ERROR] - The RC value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
 fi
-
 
 
 if [[ ! "$arg_1_option10" == "mapq=" ]]; then
