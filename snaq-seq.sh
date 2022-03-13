@@ -137,6 +137,11 @@ if [[ ! "$arg_1_option2" == "output=" ]]; then
 	output=false
 	echo -e "***\n [ERROR] - The 'output=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
     	exit 1
+elif if [[ ! -d "$arg_2_option2" ]]; then
+        output=false
+	echo -e "***\n [ERROR] - The 'output=' option is provided with no directory. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+        fi
 else 
 	if [ "$arg_1_option2" == "output=" ] && [ -d "$arg_2_option2" ]; then
 	output=true	
