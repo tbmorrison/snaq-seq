@@ -90,8 +90,11 @@ arg_1_option14=$(echo ${14} | sed 's/=.*/=/g')
 arg_1_option15=$(echo ${15} | sed 's/=.*/=/g')
 arg_1_option16=$(echo ${16} | sed 's/=.*/=/g')
 
-arg_2_option1=$(echo ${1} | sed 's/.*\.//g')
-arg_2_option2=$(echo ${2} | sed 's/.*\.//g')
+arg_2_option1=$(echo ${1} | sed 's/.*=//g')
+arg_3_option1=$(echo ${1} | sed 's/.*\.//g')
+arg_4_option1=$(echo ${1} | sed 's/.*\.//g')
+
+arg_2_option2=$(echo ${2} | sed 's/.*=//g')
 arg_2_option3=$(echo ${3} | sed 's/.*\.//g')
 arg_2_option4=$(echo ${4} | sed 's/.*\.//g')
 arg_2_option5=$(echo ${5} | sed 's/.*\.//g')
@@ -106,6 +109,28 @@ arg_2_option13=$(echo ${13} | sed 's/.*=//g')
 arg_2_option14=$(echo ${14} | sed 's/.*=//g') 
 arg_2_option15=$(echo ${15} | sed 's/.*=//g')
 arg_2_option16=$(echo ${16} | sed 's/.*=//g')
+
+
+
+if [ "$arg_1_option1" != "inputDIR=" ]; then
+	if [  "$arg_1_option1" != "inputFILE=" ]; then
+	output=false
+	echo -e "***\n [ERROR] - The 'input' option is incorrect. Please run 'snaq-seq.sh -h' for more information on 'inputDIR' and 'inputFILE'. *** \n"
+        exit 1
+	fi
+elif [[  "$arg_1_option1" == "inputDIR=" ]]; then
+	if [[ ! -d "$arg_2_option1" ]]; then
+	output=false
+        echo -e "***\n [ERROR] - The 'inputDIR=' option is provided with no directory. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+	fi
+else
+	output=true
+#if [[ ! "$arg_1_option1" == "inputFILE=" ]] && [[ -d "$arg_1_option2" ]]; then
+#        output=false
+#fi
+
+fi
 
 
 if [[ ! "$arg_1_option2" == "output=" ]]; then
@@ -172,18 +197,19 @@ else
 fi
 
 
-
 if [[ ! "$arg_1_option7" == "ofsCutoff=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'ofsCutoff=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ "$arg_1_option7" == "mfs=" ] && [[ ! "$arg_2_option7" =~ ^[0-9]+$ ]]; then
+elif [ "$arg_1_option7" == "ofsCutoff=" ] && [[  "$arg_2_option7" =~ ^[0-9].*[0-9]$ ]] ; then
         output=true
 else
         output=false
         echo -e "***\n [ERROR] - The ofsCutoff value is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
 fi
+
+
 
 if [[ ! "$arg_1_option8" == "mfs=" ]]; then
         output=false
@@ -216,7 +242,7 @@ if [[ ! "$arg_1_option10" == "mapq=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'mapq=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ "$arg_1_option10" == "mapq=" ] && [[  "$arg_2_option10" =~ ^[0-9]+$ ]]; then
+elif [ "$arg_1_option10" == "mapq=" ] && [[  "$arg_2_option10" =~ ^[-?][0-9]+$ ]]; then
         output=true
 else
         output=false
@@ -383,7 +409,7 @@ else
     eval $pull_cmd
 fi
 
-# If input is receiving directory and  options verified from user.
+ If input is receiving directory and  options verified from user.
 if [ $input = "inputDIR" ] ; then 
     docker run -e inputDIR="$inputDIR" -e genome_fasta="$genome_fasta" -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}  -e cc="${14}" -e is=${15} -e option0=$option0 -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15  -v $inputDIR:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:$tag_sel bash /snaq-seq/init-inputDIR.sh
 	
