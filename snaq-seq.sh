@@ -32,7 +32,7 @@ Help()
    echo "4)  bc=                        Location file path of basechange file."
    echo "5)  norm=                      Location file path of IS amplicon adjustment (normalization) file (tab seperated format)."
    echo "6)  outputSAM=                 Alignment output in SAM format (0=False, 1=True) (integer value)."
-   echo "7)  ofsCutoff=                 offspring Cutoff (float value)."
+   echo "7)  ofsCutoff=                 offspring Cutoff (0 1)."
    echo "8)  mfs=                       Minimum fragment size (integer value)."
    echo "9)  RC=                        RC (integer value)."
    echo "10) mapq=                      Mapping quality (integer value)."
@@ -201,7 +201,7 @@ if [[ ! "$arg_1_option7" == "ofsCutoff=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'ofsCutoff=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ "$arg_1_option7" == "ofsCutoff=" ] && [[  "$arg_2_option7" =~ ^[0-9].*[0-9]$ ]] ; then
+elif [ "$arg_1_option7" == "ofsCutoff=" ] && [[  "$arg_2_option7" =~ ^[0]\.[0-9]+$ ]] ; then
         output=true
 else
         output=false
