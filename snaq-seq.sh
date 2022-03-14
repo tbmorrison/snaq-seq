@@ -24,9 +24,9 @@ Help()
    echo
    echo "There are a total of 16 options (depending on the input option, at least 1 filepath(s), at least 3 filenames, 9 integer values, 1 float value) to be provided in the following order on the command line:"
    echo " "
-   echo "1)  inputDIR=                  Location folder path to fastq files (folder should ONLY consist of fastq input)."
+   echo "1)  inputDIR=                  Location folder path to fastq.gz files (folder should ONLY consist of fastq input)."
    echo "                     OR                                                                                        "
-   echo	"    inputFILE=                 Location file path of forward AND reverse fastq files seperated by comma."			
+   echo	"    inputFILE=                 Location file path of forward AND reverse fastq.gz files seperated by comma."			
    echo "2)  output=                    Location folder path to place analysis outputs."
    echo "3)  rg=       	                Location file path of reference genome (fasta format). The path must include bwa indices."
    echo "4)  bc=                        Location file path of basechange file."
@@ -74,10 +74,31 @@ if [ $# -lt "$ARGS" ]; then
 fi
 
 arg_1_option1=$(echo ${1} | sed 's/=.*/=/g')
-arg_1_option2=$(echo ${2} | sed 's/=.*/=/g')
+arg_2_option1=$(echo ${1} | sed 's/.*=//g')
+arg_3_option1=$(echo ${1} | sed 's/.*\.//g')
+arg_4_option1=$(echo ${1} | sed 's/.*\.//g')
+
+
 arg_1_option3=$(echo ${3} | sed 's/=.*/=/g')
+arg_2_option3=$(echo ${3} | sed 's/.*\.//g')
+arg_3_option3=$(echo ${3} | sed 's/.*=//g')
+arg_4_option3=$(echo ${3} | sed 's/.*=//g' | sed 's/.fasta/.fasta.amb/g')
+arg_5_option3=$(echo ${3} | sed 's/.*=//g' | sed 's/.fasta/.fasta.ann/g')
+arg_6_option3=$(echo ${3} | sed 's/.*=//g' | sed 's/.fasta/.fasta.bwt/g')
+arg_7_option3=$(echo ${3} | sed 's/.*=//g' | sed 's/.fasta/.fasta.fai/g')
+arg_8_option3=$(echo ${3} | sed 's/.*=//g' | sed 's/.fasta/.fasta.sa/g')
+arg_9_option3=$(echo ${3} | sed 's/.*=//g' | sed 's/.fasta/.fasta.pac/g')
+
 arg_1_option4=$(echo ${4} | sed 's/=.*/=/g')
+arg_2_option4=$(echo ${4} | sed 's/.*\.//g')
+arg_3_option4=$(echo ${4} | sed 's/.*=//g')
+
 arg_1_option5=$(echo ${5} | sed 's/=.*/=/g')
+arg_2_option5=$(echo ${5} | sed 's/.*\.//g')
+arg_3_option5=$(echo ${5} | sed 's/.*=//g')
+
+
+arg_1_option2=$(echo ${2} | sed 's/=.*/=/g')
 arg_1_option6=$(echo ${6} | sed 's/=.*/=/g')
 arg_1_option7=$(echo ${7} | sed 's/=.*/=/g')
 arg_1_option8=$(echo ${8} | sed 's/=.*/=/g')
@@ -90,14 +111,8 @@ arg_1_option14=$(echo ${14} | sed 's/=.*/=/g')
 arg_1_option15=$(echo ${15} | sed 's/=.*/=/g')
 arg_1_option16=$(echo ${16} | sed 's/=.*/=/g')
 
-arg_2_option1=$(echo ${1} | sed 's/.*=//g')
-arg_3_option1=$(echo ${1} | sed 's/.*\.//g')
-arg_4_option1=$(echo ${1} | sed 's/.*\.//g')
 
 arg_2_option2=$(echo ${2} | sed 's/.*=//g')
-arg_2_option3=$(echo ${3} | sed 's/.*\.//g')
-arg_2_option4=$(echo ${4} | sed 's/.*\.//g')
-arg_2_option5=$(echo ${5} | sed 's/.*\.//g')
 arg_2_option6=$(echo ${6} | sed 's/.*=//g') 
 arg_2_option7=$(echo ${7} | sed 's/.*=//g')
 arg_2_option8=$(echo ${8} | sed 's/.*=//g')
@@ -132,6 +147,28 @@ else
 
 fi
 
+# check validity of heads of fastq files
+if [[ "$arg_1_option1" == "inputFILE=" ]]; then
+    IFS="," read -r -a fastq_filenames <<< "$arg_2_option1"
+elif [[ "$arg_1_option1" == "inputDIR=" ]]; then
+    fastq_filenames=("$arg_2_option1"/*.fastq.gz)
+fi
+
+for file in "${fastq_filenames[@]}"; do
+    # check line1 of compressed fastq files starts with a '@' character
+    line1=`gzcat < $file | head -1`
+    if [[ ! "$line1" =~ ^\@ ]]; then
+	echo -e "***\n [ERROR] - input fastq.gz files are not valid format. Please check input file validity. *** \n"
+    fi
+
+    # check sequence lines match lengths of quality scores for first 40 lines (additional check)
+    len_int=`gzcat < $file | head -40 | paste - - - - | awk -F"\t" '{ if (length($2) != length($4)) print $0 }' | wc -l`
+    echo "$file"
+    echo "$len_int"
+    if [[ ! "$len_int" -eq "0" ]]; then
+	echo -e "***\n [ERROR] - input fastq.gz files are not valid format. Please check input file validity. *** \n"
+    fi
+done
 
 if [[ ! "$arg_1_option2" == "output=" ]]; then
 	output=false
@@ -151,19 +188,37 @@ if [[ ! "$arg_1_option3" == "rg=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'rg=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ "$arg_1_option3" == "rg=" ] && [ "$arg_2_option3" == "fasta" ] ; then
-        output=true 
-elif [ "$arg_1_option3" == "rg=" ] && [ "$arg_2_option3" == "fa" ] ; then
-        output=true
-else
+elif [[ ! -f "$arg_3_option3" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'rg=' option is provided with no file. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ ! "$arg_2_option3" == "fa" ]; then
 	output=false
-	echo -e "***\n [ERROR] - The genome file type is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
-	exit 1
+        echo -e "***\n [ERROR] - The 'rg=' option filetype is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ ! "$arg_2_option3" == "fasta" ]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'rg=' option filetype is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [ -f "$arg_3_option3" ]; then
+	if [ "$arg_2_option3" == "fa" ] || [ "$arg_2_option3" == "fasta" ]; then
+		if [[ ! -f "$arg_4_option3" ]] && [[ ! -f "$arg_5_option3" ]] && [[ ! -f "$arg_6_option3" ]] && [[ ! -f "$arg_7_option3" ]] && [[ ! -f "$arg_8_option3" ]] && [[ ! -f "$arg_9_option3" ]]; then
+			output=false 
+			echo -e "***\n [ERROR] - The genome file and indices are incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+			exit 1
+		fi
+	fi
+else
+	output=true
 fi
 
 if [[ ! "$arg_1_option4" == "bc=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'bc=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [[ ! -f "$arg_3_option4" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'bc=' option is provided with no file. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
 elif [ "$arg_1_option4" == "bc=" ] && [ "$arg_2_option4" == "txt" ]; then
         output=true
@@ -176,6 +231,10 @@ fi
 if [[ ! "$arg_1_option5" == "norm=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'norm=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [[ ! -f "$arg_3_option5" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'norm=' option is provided with no file. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
 elif [ "$arg_1_option5" == "norm=" ] && [ "$arg_2_option5" == "txt" ]; then
         output=true
@@ -391,6 +450,16 @@ bc_amp=$(echo ${4} |sed 's/.*=//g')
 norm_amp=$(echo ${5} |sed 's/.*=//g')
 genome_fasta=$(echo ${ref} | sed 's@.*/@@')
 genome_path=$(echo ${ref} | sed 's/\/[^/]*$/\//')
+
+
+# check fasta file header
+ref_line1=$(sed -n '/^>/p;q' "$ref")
+
+if [[ ! "$ref_line1" =~ ^\> ]]; then
+    echo -e "***\n [ERROR] - The reference genome file is not a valid .fasta format. Please check input file validity. *** \n"
+fi
+
+
 
 
 # Get array of tags for accugenomics/snaq-seq
