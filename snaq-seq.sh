@@ -156,15 +156,13 @@ fi
 
 for file in "${fastq_filenames[@]}"; do
     # check line1 of compressed fastq files starts with a '@' character
-    line1=`gzcat < $file | head -1`
+    line1=`zcat < $file | head -1`
     if [[ ! "$line1" =~ ^\@ ]]; then
 	echo -e "***\n [ERROR] - input fastq.gz files are not valid format. Please check input file validity. *** \n"
     fi
 
     # check sequence lines match lengths of quality scores for first 40 lines (additional check)
-    len_int=`gzcat < $file | head -40 | paste - - - - | awk -F"\t" '{ if (length($2) != length($4)) print $0 }' | wc -l`
-    echo "$file"
-    echo "$len_int"
+    len_int=`zcat < $file | head -40 | paste - - - - | awk -F"\t" '{ if (length($2) != length($4)) print $0 }' | wc -l`
     if [[ ! "$len_int" -eq "0" ]]; then
 	echo -e "***\n [ERROR] - input fastq.gz files are not valid format. Please check input file validity. *** \n"
     fi
