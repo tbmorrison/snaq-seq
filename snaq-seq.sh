@@ -208,6 +208,14 @@ elif [ -f "$arg_3_option3" ]; then
 			exit 1
 		fi
 	fi
+elif [[ ! "$arg_2_option3" == "fa" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'rg=' option filetype is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
+elif [[ ! "$arg_2_option3" == "fasta" ]]; then
+        output=false
+        echo -e "***\n [ERROR] - The 'rg=' option filetype is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+        exit 1
 else
 	output=true
 fi
