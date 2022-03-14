@@ -192,14 +192,14 @@ elif [[ ! -f "$arg_3_option3" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'rg=' option is provided with no file. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ ! "$arg_2_option3" == "fa" ]; then
-	output=false
-        echo -e "***\n [ERROR] - The 'rg=' option filetype is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
-        exit 1
-elif [ ! "$arg_2_option3" == "fasta" ]; then
-        output=false
-        echo -e "***\n [ERROR] - The 'rg=' option filetype is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
-        exit 1
+#elif [[ ! "$arg_2_option3" == "fa" ]]; then
+#	output=false
+#        echo -e "***\n [ERROR] - The 'rg=' option filetype is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+#        exit 1
+#elif [[ ! "$arg_2_option3" == "fasta" ]]; then
+#        output=false
+#        echo -e "***\n [ERROR] - The 'rg=' option filetype is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
+#        exit 1
 elif [ -f "$arg_3_option3" ]; then
 	if [ "$arg_2_option3" == "fa" ] || [ "$arg_2_option3" == "fasta" ]; then
 		if [[ ! -f "$arg_4_option3" ]] && [[ ! -f "$arg_5_option3" ]] && [[ ! -f "$arg_6_option3" ]] && [[ ! -f "$arg_7_option3" ]] && [[ ! -f "$arg_8_option3" ]] && [[ ! -f "$arg_9_option3" ]]; then
