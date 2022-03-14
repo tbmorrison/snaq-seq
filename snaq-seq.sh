@@ -477,31 +477,31 @@ tags=`wget -q https://registry.hub.docker.com/v1/repositories/accugenomics/snaq-
 tags_arr=($(echo "$tags" | tr ',' '\n'))
 tag_sel=$(echo ${16} | sed 's/VERSION=//g')
 
-#if [ ${tag_sel} = "v1" ];  then
-#    pull_cmd="docker pull accugenomics/snaq-seq:$tag_sel"
-#    eval $pull_cmd
-#elif [[ ! ${tags_arr[*]} =~ $tag_sel ]]; then
-#    printf "** [ERROR] - Selected VERSION not found in Docker Hub. Available versions are: **\n"
-#        for i in "${tags_arr[@]}"
-#        do
-#            echo "$i"
-#        done
-#    exit 1
-#else    
-#    pull_cmd="docker pull accugenomics/snaq-seq:$tag_sel"
-#    eval $pull_cmd
-#fi
+if [ ${tag_sel} = "v1" ];  then
+    pull_cmd="docker pull accugenomics/snaq-seq:$tag_sel"
+    eval $pull_cmd
+elif [[ ! ${tags_arr[*]} =~ $tag_sel ]]; then
+    printf "** [ERROR] - Selected VERSION not found in Docker Hub. Available versions are: **\n"
+        for i in "${tags_arr[@]}"
+        do
+            echo "$i"
+        done
+    exit 1
+else    
+    pull_cmd="docker pull accugenomics/snaq-seq:$tag_sel"
+    eval $pull_cmd
+fi
 
 #If input is receiving directory and  options verified from user.
-#if [ $input = "inputDIR" ] ; then 
-#    docker run -e inputDIR="$inputDIR" -e genome_fasta="$genome_fasta" -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}  -e cc="${14}" -e is=${15} -e option0=$option0 -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15  -v $inputDIR:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:$tag_sel bash /snaq-seq/init-inputDIR.sh
+if [ $input = "inputDIR" ] ; then 
+    docker run -e inputDIR="$inputDIR" -e genome_fasta="$genome_fasta" -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}  -e cc="${14}" -e is=${15} -e option0=$option0 -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15  -v $inputDIR:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:$tag_sel bash /snaq-seq/init-inputDIR.sh
 	
-#fi
+fi
 
 # If input is receiving single fastq set and options verified from user.
-#if  [ $input = "inputFILE" ] ; then 
-#    docker run -e inputFILE_fasta="$inputFILE_fasta" -e  genome_fasta="$genome_fasta"  -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15 -v $inputFILE_path:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:$tag_sel bash /snaq-seq/init-inputFILE.sh
-#fi
+if  [ $input = "inputFILE" ] ; then 
+    docker run -e inputFILE_fasta="$inputFILE_fasta" -e  genome_fasta="$genome_fasta"  -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15 -v $inputFILE_path:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:$tag_sel bash /snaq-seq/init-inputFILE.sh
+fi
 
 exit
 
