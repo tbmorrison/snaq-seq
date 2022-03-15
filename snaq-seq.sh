@@ -301,7 +301,7 @@ if [[ ! "$arg_1_option9" == "RC=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'RC=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ "$arg_1_option9" == "RC=" ] && [[  "$arg_2_option9" =~ ^[0-9]+$ ]]; then
+elif [ "$arg_1_option9" == "RC=" ] && [[  "$arg_2_option9" =~ ^[1-9]+$ ]]; then
         output=true
 else
         output=false
@@ -340,7 +340,7 @@ if [[ ! "$arg_1_option12" == "gbc=" ]]; then
         output=false
         echo -e "***\n [ERROR] - The 'gbc=' option is incorrect. Please run 'snaq-seq.sh -h' for more information. *** \n"
         exit 1
-elif [ "$arg_1_option12" == "gbc=" ] && [[  "$arg_2_option12" =~ ^[0-9]+$ ]]; then
+elif [ "$arg_1_option12" == "gbc=" ] && [[  "$arg_2_option12" =~ ^[1-9]+$ ]]; then
         output=true
 else
         output=false
