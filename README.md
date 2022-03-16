@@ -94,14 +94,13 @@ Command line parameters will indicate path to input and output files, along with
 14) CC=                     Number of complexity control copies spiked into the sample (integer value).
 15) IS=                     Internal standards input copies: number of IS copies spiked into the sample. If value is zero, don’t perform coverage analysis or viral load (integer value)
 16) VERSION=                Docker container version (string).
-```
+
 
 Snaq-seq will  verify if the options were provided appropriately before proceeding.
 
 ```
 $ bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/ref/genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1
 
-... 
 
 input=/home/input/fastq
 output=/home/output
