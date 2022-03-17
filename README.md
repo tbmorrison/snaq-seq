@@ -1,21 +1,34 @@
-# Snaq-Seq: command line QC tool for viral surveillance NGS testing. 
+# SNAQ-SEQ CLI QC tool for viral surveillance NGS testing. 
 
 Table of Contents
 -----------------
 - [Introduction](#introduction)
-- [Objective](#objective)
+- [Command Line Interphase](#cli)
 - [System requirements](#requirements)
 - [Input data](#data)
   1. [Reference genome](#reference-genome)
   2. [Reference amplicon](#reference-amplicon)
   3. [Adjustment amplicon](#adjustment-amplicon)
 - [Usage](#usage-options)
+- [Docker container](#docker)
 
 ## <a name="introduction"></a> Introduction-
 
-Viral surveillance by NGS is a complex test that uses various sequencing metrics (e.g., genomic coverage x read depth) to detect testing failures.  SNAQ-SEQ SARS-CoV-2 RNA Internal Standards (IS) are spiked into every sample and provides missing QC to detect NGS test issues.  To minimize disruption to bioinformatic pipeline, the CLI will replace a common step—the removal of human reads prior to further processing.  The CLI will input one FASTQ input and output Viral (NT), and SNAQ-SEQ analysis appended to a CSV file.  The CSV will contain samples in rows and columns indicating SNAQ analysis results for coverage, read depth, viral load, recombination, and complexity capture.  Command line parameters will indicate path to input and output files, along with IS spike-in analysis parameters. The CLI will run as a container to simplify deployment.
+[AccuGenomics](https://accugenomics.com/) patented and propriety technology, Standardized Nucleic Acid Quantification for Sequencing (SNAQ™-SEQ) is an innovative method that utilizes synthetic DNA or RNA internal standards mixtures (ISM™) that are spiked into each sample prior to extraction or NGS library preparation steps. These ISMs are the most optimal way of controlling for variation within the result and are the gold standard method for sensitive bioanalyte measurements.
 
-## <a name="objective"></a> Objective-
+This unique spike-in control technology dramatically improves the accuracy and performance of clinical sequencing tests for low abundance biomarkers such as circulating tumor DNA (ctDNA) and low titer infectious pathogens such as SARS-CoV-2.
+
+The ISMs undergo the same processing, handling and reaction conditions as the sample does, to provide the ideal run control approach for NGS-based assays.
+
+## <a name="cli"></a> Command Line Interphase-
+
+The SNAQ-SEQ Command Line Interphase is an open source tool that simplifies viral surveillance by NGS. This is a complex test that uses various sequencing metrics (e.g., genomic coverage x read depth) to detect testing failures.  SNAQ-SEQ SARS-CoV-2 RNA Internal Standards (IS) are spiked into every sample and provides missing QC to detect NGS test issues.
+
+To minimize disruption to a bioinformatic pipeline, the SNAQ-SEQ CLI replaces a common step: the removal of human reads prior to further processing.
+
+The CLI will input one FASTQ input and output Viral (NT), and SNAQ-SEQ analysis appended to a CSV file.  The CSV will contain samples in rows and columns indicating SNAQ analysis results for coverage, read depth, viral load, recombination, and complexity capture.
+
+Parameters indicate path to input and output files, along with IS spike-in analysis parameters. The CLI runs as a container to simplify deployment.
 
 Instruct the user to utilize the SNAQ-SEQ container on their specific samples.
 
@@ -119,3 +132,6 @@ CC=300
 IS=300
 VERSION=v1
 ```
+## <a name="docker"></a> Docker Container-
+
+The SNAQ-SEQ pipeline is in a public container located on [DockerHub](https://hub.docker.com/r/accugenomics/snaq-seq).
