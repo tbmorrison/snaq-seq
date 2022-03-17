@@ -80,34 +80,34 @@ Usage: bash snaq-seq.sh input=/home/input/fastq/ output=/home/output rg=/home/in
 ## Parameters:
 
 Command line parameters will indicate path to input and output files, along with IS spike-in analysis parameters. There are a total of 15 parameters (3 filepaths, 2 filenames, 10 integer values) to be provided in the following order on the command line:
- 
-1)  input=                  Location folder path to fastq files, folders should only consist of fastq files.
-2)  output=                 Location folder path to place analysis outputs.
-3)  rg=       	            Location file path of reference genome (fasta format). The path must include bwa indices. The reference genome must also have:
-  - host/background, e.g., hg19 
-  - IS amplicons (contig ID tagged with - SNAQ-IS) 
-  - NT amplicons (contig ID with -SNAQ-NT) 
-  - CC amplicons (contig ID tagged with -SNAQ-CC) 
-4)  bc=                     Location file path of basechange file.
-5)  norm=                   Location file path of IS amplicon adjustment (normalization) file (tab seperated format).
-6)  outputSAM=              Alignment output in SAM format (0=False, 1=True).
-7)  ofsCutoff=              offspring Cutoff (float value).
-8)  mfs=                    Minimum fragment size: minimum fragment length for good read (integer value).
-9)  RC=                     Recombinant detection stringency: indicates how many recombinant bases allowed per read pair (integer value).
-10) mapq=                   Mapping quality stringency (integer value).
-11) qCutoff=                Minimum Q score for good read (integer value).
-12) gbc=                    Number of base change positions in a fragment for it to be considered valid (integer value).
-13) outputIS=               Include IS sequences in fastq output (integer value).
-14) CC=                     Number of complexity control copies spiked into the sample (integer value).
-15) IS=                     Internal standards input copies: number of IS copies spiked into the sample. If value is zero, don’t perform coverage analysis or viral load (integer value)
-16) VERSION=                Docker container version (string).
 
+| Parameter      | Description
+| -------------- | -----------
+| 1)  input      | Location folder path to fastq files, folders should only consist of fastq files.
+| 2)  output     | Location folder path to place analysis outputs.
+| 3)  rg         |      	            Location file path of reference genome (fasta format). The path must include bwa indices. The reference genome must also have:
+|                | * host/background, e.g., hg19
+|                | * IS amplicons (contig ID tagged with - SNAQ-IS)
+|                | * NT amplicons (contig ID with -SNAQ-NT)
+|                | * CC amplicons (contig ID tagged with -SNAQ-CC) 
+| 4)  bc         | Location file path of basechange file.
+| 5)  norm       | Location file path of IS amplicon adjustment (normalization) file (tab seperated format).
+| 6)  outputSAM  | Alignment output in SAM format (0=False, 1=True).
+| 7)  ofsCutoff  | Offspring Cutoff (float value).
+| 8)  mfs        | Minimum fragment size: minimum fragment length for good read (integer value).
+| 9)  RC         | Recombinant detection stringency: indicates how many recombinant bases allowed per read pair (integer value).
+| 10) mapq       | Mapping quality stringency (integer value).
+| 11) qCutoff    | Minimum Q score for good read (integer value).
+| 12) gbc        | Number of base change positions in a fragment for it to be considered valid (integer value).
+| 13) outputIS   | Include IS sequences in fastq output (integer value).
+| 14) CC         | Number of complexity control copies spiked into the sample (integer value).
+| 15) IS         | Internal standards input copies: number of IS copies spiked into the sample. If value is zero, don’t perform coverage analysis or viral load (integer value)
+| 16) VERSION    | Docker container version (string).
 
-Snaq-seq will  verify if the options were provided appropriately before proceeding.
+SNAQ-SEQ will  verify if the options were provided appropriately before proceeding.
 
 ```
 $ bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/ref/genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1
-
 
 input=/home/input/fastq
 output=/home/output
