@@ -3,7 +3,7 @@
 Table of Contents
 -----------------
 - [Introduction](#introduction)
-- [Command Line Interphase](#cli)
+- [Command Line Interface](#cli)
 - [System requirements](#requirements)
 - [Input data](#data)
   1. [Reference genome](#reference-genome)
@@ -20,9 +20,9 @@ This unique spike-in control technology dramatically improves the accuracy and p
 
 The ISMs undergo the same processing, handling and reaction conditions as the sample does, to provide the ideal run control approach for NGS-based assays.
 
-## <a name="cli"></a> Command Line Interphase-
+## <a name="cli"></a> Command Line Interface-
 
-The SNAQ-SEQ Command Line Interphase is an open source tool that simplifies viral surveillance by NGS. This is a complex test that uses various sequencing metrics (e.g., genomic coverage x read depth) to detect testing failures.  SNAQ-SEQ SARS-CoV-2 RNA Internal Standards (IS) are spiked into every sample and provides missing QC to detect NGS test issues.
+The SNAQ-SEQ Command Line Interface is an open source tool that simplifies viral surveillance by NGS. This is a complex test that uses various sequencing metrics (e.g., genomic coverage x read depth) to detect testing failures.  SNAQ-SEQ SARS-CoV-2 RNA Internal Standards (IS) are spiked into every sample and provides missing QC to detect NGS test issues.
 
 To minimize disruption to a bioinformatic pipeline, the SNAQ-SEQ CLI replaces a common step: the removal of human reads prior to further processing.
 
