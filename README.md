@@ -3,12 +3,9 @@
 Table of Contents
 -----------------
 - [Introduction](#introduction)
-- [Command Line Interface](#cli)
+- [Command Line Interface](#command-line-interface)
 - [System requirements](#requirements)
 - [Input data](#data)
-  1. [Reference genome](#reference-genome)
-  2. [Reference amplicon](#reference-amplicon)
-  3. [Adjustment amplicon](#adjustment-amplicon)
 - [Usage](#usage-options)
 - [Docker container](#docker)
 
@@ -20,7 +17,7 @@ This unique spike-in control technology dramatically improves the accuracy and p
 
 The ISMs undergo the same processing, handling and reaction conditions as the sample does, to provide the ideal run control approach for NGS-based assays.
 
-## <a name="cli"></a> Command Line Interface-
+## <a name="command-line-interface"></a> Command Line Interface-
 
 The SNAQ-SEQ Command Line Interface is an open source tool that simplifies viral surveillance by NGS. This is a complex test that uses various sequencing metrics (e.g., genomic coverage x read depth) to detect testing failures.  SNAQ-SEQ SARS-CoV-2 RNA Internal Standards (IS) are spiked into every sample and provides missing QC to detect NGS test issues.
 
@@ -49,6 +46,10 @@ Docker application verified...
 
 ## <a name="data"></a> Input data-
 
+#### Sequencing files
+
+Compressed fastq files for single or paired read should be provided depending of the analysis.
+
 #### Reference genome:
 
 SNAQ-SEQ uses the bwa aligner for the analysis which requires the reference genome (fasta format) and bwa indices. 
@@ -63,6 +64,15 @@ The basechange amplicon is required to be provided in txt format. The preliminar
 
 The adjustment (normalization) amplicon is required to be provided in tab seperated format used to generate result values in the output.
 
+#### Normalization file:
+
+This file contains two columns:
+
+* amplicon names are in column 1 and match sequence names in the amplicon fasta file
+* column 2 has the normalization factors
+
+_Note: the normalization file should not have titles_
+
 ## <a name="usage-options"></a> Usage-
 
 For information about usage and options, run ```bash snaq-seq.sh -h```: 
@@ -74,7 +84,7 @@ $ bash snaq-seq.sh -h
  
      Snaq-Seq: QC for viral surveillance NGS testing.     
 
-Usage: bash snaq-seq.sh input=/home/input/fastq/ output=/home/output rg=/home/input/ref/genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300
+Usage: bash snaq-seq.sh input=/home/input/fastq/ output=/home/output rg=/home/input/ref/genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1
 ```
 
 ## Parameters:
@@ -86,10 +96,10 @@ Command line parameters will indicate path to input and output files, along with
 | 1)  input      | Location folder path to fastq files, folders should only consist of fastq files.
 | 2)  output     | Location folder path to place analysis outputs.
 | 3)  rg         |      	            Location file path of reference genome (fasta format). The path must include bwa indices. The reference genome must also have:
-|                | * host/background, e.g., hg19
-|                | * IS amplicons (contig ID tagged with - SNAQ-IS)
-|                | * NT amplicons (contig ID with -SNAQ-NT)
-|                | * CC amplicons (contig ID tagged with -SNAQ-CC) 
+|                | - host/background, e.g., hg19
+|                | - IS amplicons (contig ID tagged with - SNAQ-IS)
+|                | - NT amplicons (contig ID with -SNAQ-NT)
+|                | - CC amplicons (contig ID tagged with -SNAQ-CC) 
 | 4)  bc         | Location file path of basechange file.
 | 5)  norm       | Location file path of IS amplicon adjustment (normalization) file (tab seperated format).
 | 6)  outputSAM  | Alignment output in SAM format (0=False, 1=True).
