@@ -36,13 +36,11 @@ Instruct the user to utilize the SNAQ-SEQ container on their specific samples.
 
 SNAQ-SEQ only supports Linux systems and uses the docker application. 
 
-If docker is not installed, the beta version will attempt to set up docker that will require sudo (admin) priveleges. 
-
 SNAQ-SEQ will verfiy both system requirements before proceeding.
 
 ```
 
-$ bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/ref bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300
+$ bash snaq-seq.sh input=/home/input/fastq output=/home/output rg=/home/input/ref bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1
 
 Linux system verified...
 
@@ -56,10 +54,6 @@ Docker application verified...
 SNAQ-SEQ uses the bwa aligner for the analysis which requires the reference genome (fasta format) and bwa indices. 
 
 SNAQ-SEQ will verify if there are existing bwa indices made available that can be used for the analysis.
-
-
-* Note: If SNAQ-SEQ is unable to detect any bwa indices in the filepath provided, it will proceed with generating indices on the fly to be used for the analysis (the generated indices won't be saved).
-
 
 #### Reference amplicon:
 
