@@ -31,6 +31,24 @@ The current version of SNAQ-Vsoft CLI has only been tested on Linux systems usin
 
 SNAQ-Vsoft CLI will verfiy both system requirements before proceeding as depicted in the example below.
 
+=======
+The SNAQ-Vsoft Command Line Interface (SNAQ-Vsoft CLI) is an open source tool that simplifies viral surveillance by NGS. This is a complex test that uses various sequencing metrics (e.g., genomic coverage x read depth) to detect testing failures.  SNAQ-SEQ SARS-CoV-2 RNA Internal Standards (IS) are spiked into every sample and provides missing QC to detect NGS test issues.
+
+To minimize disruption to a bioinformatic pipeline, the SNAQ-Vsoft CLI replaces a common step: the removal of human reads prior to further processing.
+
+The CLI will input one FASTQ input and output Viral (NT), and SNAQ-Vsoft CLI analysis appended to a CSV file.  The CSV will contain samples in rows and columns indicating SNAQ analysis results for coverage, read depth, viral load, recombination, and complexity capture.
+
+Parameters indicate path to input and output files, along with IS spike-in analysis parameters. The CLI runs as a container to simplify deployment.
+
+Instruct the user to utilize the SNAQ-Vsoft CLI container on their specific samples.
+
+## <a name="requirements"></a> System requirements-
+
+SNAQ-Vsoft CLI only supports Linux systems and uses the docker application. 
+
+SNAQ-Vsoft CLI will verfiy both system requirements before proceeding.
+
+
 ```
 
 $ bash snaq-vsoft.sh input=/home/input/fastq output=/home/output rg=/home/input/ref bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1
@@ -48,7 +66,7 @@ Compressed fastq files for single or paired read should be provided depending of
 
 #### Reference genome:
 
-SNAQ-SEQ uses the bwa aligner for the analysis which requires the reference genome (FASTA format) and bwa indices. 
+SNAQ-Vsoft CLI uses the bwa aligner for the analysis which requires the reference genome (fasta format) and bwa indices. 
 
 SNAQ-SEQ will verify if there are existing bwa indices made available that can be used for the analysis.
 
@@ -81,7 +99,9 @@ Usage: bash snaq-vsoft.sh input=/home/input/fastq/ output=/home/output rg=/home/
 
 ## Parameters:
 
-Command line parameters will indicate path to input and output files, along with IS spike-in analysis parameters. There are a total of 15 parameters (3 filepaths, 2 filenames, 10 integer values) to be provided in the following order on the command line:
+Command line parameters will indicate path to input and output files, along with IS spike-in analysis parameters. There are a total of 16 options (depending on the input option, at least 1 filepath(s), at least 3 filenames, 9 integer values, 1 float value) to be provided in the following order on the command line: 
+
+Note: There is also an additional option of generating the basechange when provided amplicon sequences through the -b parameter.
 
 | Parameter      | Description
 | -------------- | -----------
@@ -105,6 +125,10 @@ Command line parameters will indicate path to input and output files, along with
 | 14) CC         | Number of complexity control copies spiked into the sample (integer value).
 | 15) IS         | Number of IS copies spiked into the sample. (integer values)
 | 16) VERSION    | Docker container version to use for analysis, leave blank to obtain newest version (string).
+| -------------- |
+| Additional     | 
+| -------------- |
+| 1)  -b         | Absolute filepath to amplicon sequences.
 
 SNAQ-Vsoft will verify if the options were provided appropriately before proceeding.
 
@@ -135,4 +159,4 @@ snaq-vsoft.sh <parameters > 2>&1 /path/to/log.txt
 
 ## <a name="docker"></a> Docker Container-
 
-The SNAQ-SEQ pipeline is in a public container located on [DockerHub](https://hub.docker.com/r/accugenomics/snaq-seq).
+The SNAQ-Vsoft CLI pipeline is in a public container located on [DockerHub](https://hub.docker.com/r/accugenomics/snaq-seq).
