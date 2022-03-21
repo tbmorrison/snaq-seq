@@ -105,7 +105,7 @@ Note: There is also an additional option of generating the basechange when provi
 | Parameter           | Description
 | ------------------- | -----------
 | 1)  input           | File path to input FASTQ or directory path to FASTQ files (directory should only consist of FASTQ files)
-| 2)  output          | Directory path to place analysis outputs.  $$$$What if user wants to specify file path?
+| 2)  output          | Directory path to place analysis outputs.  Note: If you are rerunning the fastq and sam outputs will be overrided.
 | 3)  rg              | File path of reference genome (FASTA format). The path directory must include bwa indices. The reference genome must also have:
 |                     | - host/background, e.g., hg19
 |                     | - IS amplicons (contig ID tagged with - SNAQ-IS)
