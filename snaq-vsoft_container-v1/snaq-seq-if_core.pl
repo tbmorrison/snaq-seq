@@ -1,5 +1,29 @@
 #!/usr/local/bin/perl
 # author: "Thahmina A. Ali"
+#
+## Usage: perl /snaq-seq/snaq-seq-if_core.pl $inputFILE_fasta $genome_fasta $outsam $ofs $mfs $rc $mpq $qc $gbc $outis $cc $is 
+#
+##      $inputFILE_fasta paired end fastq file names.
+##      $genome_fasta reference genome fasta file name.
+##      $outsam -  For troubleshooting purposes, instruct script to output NT & IS SAM files for good reads (-pass.sam), IS x NT recombinant (-recombinant.sam) or unmapped (-mapq.sam) (0=False, 1=True).
+##      $ofs - Identify CC offspring that arise from sequencing errors of over duplicated complexity controls. Offspring Cutoff is the fraction of maximum CC duplication, below which CC is concidered an NGS error and removed. (float value, 0 to inactivate).
+##      $mfs - Minimum fragment size: minimum fragment length for good read (integer value, -1 to inactivate).
+#       $rc - Recombinant detection stringency: indicates how many recombinant bases allowed per read pair (integer value, must be >0).
+#	$mpq - Mapping quality stringency to be concidered a good read (integer value, -1 to inactivate).
+#	$qc - Minimum Q score for good read for calling a base change position (integer value, -1 to inactivate).
+#	$gbc - Number of base change positions in a fragment for it to be considered valid (integer value, must be >0).
+#	$outis - Include IS reads in FASTQ output (0=False, 1=True).
+#	$cc - 	Number of complexity control copies spiked into the sample (integer value).
+#	$is - Number of IS copies spiked into the sample. (integer values)
+#
+## Intended Use: The following script executes the core analysis using the inputs provided from user argument initially collected by the initFILE.sh script. It is divided into four launch steps that prepares the inputs, performs the alignment and counting, prepares the count results, and generates the unified table of the snaq-vsoft analysis.   
+#
+## Program flow: It is divided into four launch steps that prepares the inputs such as setting up the pipeline commands in parrallel mode, performs the alignment and counting 
+# in parallel process.
+#
+## Example: perl /snaq-seq/snaq-seq-if_core.pl 0 0.01 0 1 1 0  1 0 300 300
+
+
 use strict;
 use warnings;
 use Time::Piece;
