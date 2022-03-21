@@ -21,7 +21,7 @@
 ## Program flow: It is divided into four launch steps that prepares the inputs such as setting up the pipeline commands in parrallel mode, performs the alignment and counting 
 # in parallel process.
 #
-## Example: perl /snaq-seq/snaq-seq-if_core.pl 0 0.01 0 1 1 0  1 0 300 300
+## Example: perl /snaq-seq/snaq-seq-if_core.pl CV21_47_002_12-5_w-IS_S146 hg19 0 0.01 0 1 1 0  1 0 300 300
 
 
 
