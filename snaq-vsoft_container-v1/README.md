@@ -7,7 +7,7 @@ This container image contains all necessary executables and dependencies for the
 
 <h2>Versioning/Tags</h3>
 All images are released with the following tag structure:
-`<major release>.<changed software package>`
+`<major release>"."<changed software package>`
 
 Release history:
 
