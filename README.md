@@ -158,3 +158,5 @@ snaq-vsoft.sh <parameters > 2>&1 /path/to/log.txt
 ## <a name="docker"></a> Docker Container-
 
 The SNAQ-Vsoft CLI pipeline is in a public container located on [DockerHub](https://hub.docker.com/r/accugenomics/snaq-seq/tags).
+
+For more information on the software architecture and details of the SNAQ-Vsoft CLI pipeline, please refer to the folder snaq-vsoft_container-v1.
