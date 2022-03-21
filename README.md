@@ -1,4 +1,4 @@
-# SNAQ-SEQ CLI QC tool for viral surveillance NGS testing. 
+# SNAQ-Vsoft CLI QC tool for viral surveillance NGS testing. 
 
 Table of Contents
 -----------------
@@ -19,21 +19,21 @@ The ISMs undergo the same processing, handling and reaction conditions as the sa
 
 ## <a name="command-line-interface"></a> Command Line Interface-
 
-The SNAQ-SEQ Command Line Interface is an open source tool that simplifies viral surveillance by NGS. This is a complex test that uses various sequencing metrics (e.g., genomic coverage x read depth) to detect testing failures.  SNAQ-SEQ SARS-CoV-2 RNA Internal Standards (IS) are spiked into every sample and provides missing QC to detect NGS test issues.
+The SNAQ-Vsoft Command Line Interface (SNAQ-Vsoft CLI) is an open source tool that simplifies viral surveillance by NGS. This is a complex test that uses various sequencing metrics (e.g., genomic coverage x read depth) to detect testing failures.  SNAQ-SEQ SARS-CoV-2 RNA Internal Standards (IS) are spiked into every sample and provides missing QC to detect NGS test issues.
 
-To minimize disruption to a bioinformatic pipeline, the SNAQ-SEQ CLI replaces a common step: the removal of human reads prior to further processing.
+To minimize disruption to a bioinformatic pipeline, the SNAQ-Vsoft CLI replaces a common step: the removal of human reads prior to further processing.
 
-The CLI will input one FASTQ input and output Viral (NT), and SNAQ-SEQ analysis appended to a CSV file.  The CSV will contain samples in rows and columns indicating SNAQ analysis results for coverage, read depth, viral load, recombination, and complexity capture.
+The CLI will input one FASTQ input and output Viral (NT), and SNAQ-Vsoft CLI analysis appended to a CSV file.  The CSV will contain samples in rows and columns indicating SNAQ analysis results for coverage, read depth, viral load, recombination, and complexity capture.
 
 Parameters indicate path to input and output files, along with IS spike-in analysis parameters. The CLI runs as a container to simplify deployment.
 
-Instruct the user to utilize the SNAQ-SEQ container on their specific samples.
+Instruct the user to utilize the SNAQ-Vsoft CLI container on their specific samples.
 
 ## <a name="requirements"></a> System requirements-
 
-SNAQ-SEQ only supports Linux systems and uses the docker application. 
+SNAQ-Vsoft CLI only supports Linux systems and uses the docker application. 
 
-SNAQ-SEQ will verfiy both system requirements before proceeding.
+SNAQ-Vsoft CLI will verfiy both system requirements before proceeding.
 
 ```
 
@@ -52,7 +52,7 @@ Compressed fastq files for single or paired read should be provided depending of
 
 #### Reference genome:
 
-SNAQ-SEQ uses the bwa aligner for the analysis which requires the reference genome (fasta format) and bwa indices. 
+SNAQ-Vsoft CLI uses the bwa aligner for the analysis which requires the reference genome (fasta format) and bwa indices. 
 
 SNAQ-SEQ will verify if there are existing bwa indices made available that can be used for the analysis.
 
@@ -138,4 +138,4 @@ VERSION=v1
 ```
 ## <a name="docker"></a> Docker Container-
 
-The SNAQ-SEQ pipeline is in a public container located on [DockerHub](https://hub.docker.com/r/accugenomics/snaq-seq).
+The SNAQ-Vsoft CLI pipeline is in a public container located on [DockerHub](https://hub.docker.com/r/accugenomics/snaq-seq).
