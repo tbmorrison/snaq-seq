@@ -47,4 +47,4 @@ Scripts indcluded in the pipeline and the control flow are briefly described bel
     makeFastq.awk - prepare and output processed .fastq file(s)
     CombineThreads.R - aggregate read types, calculate summary statistics, output to .csv
 
-<img src="https://github.com/tbmorrison/snaq-seq/tree/main/snaq-vsoft_container-v1/snaq_vsoft_flow.png" align="center"  />
+<img src="https://github.com/tbmorrison/snaq-seq/blob/main/snaq-vsoft_container-v1/snaq_vsoft_flow.png" align="center"  />
