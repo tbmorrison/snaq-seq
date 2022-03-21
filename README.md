@@ -125,9 +125,7 @@ Note: There is also an additional option of generating the basechange when provi
 | 14) CC         | Number of complexity control copies spiked into the sample (integer value).
 | 15) IS         | Number of IS copies spiked into the sample. (integer values)
 | 16) VERSION    | Docker container version to use for analysis, leave blank to obtain newest version (string).
-
 | Additional     | 
-| -------------- | -----------
 | 1)  -b         | Absolute filepath to amplicon sequences.
 
 SNAQ-Vsoft will verify if the options were provided appropriately before proceeding.
