@@ -31,7 +31,6 @@ The current version of SNAQ-Vsoft CLI has only been tested on Linux systems usin
 
 SNAQ-Vsoft CLI will verfiy both system requirements before proceeding as depicted in the example below.
 
-=======
 The SNAQ-Vsoft Command Line Interface (SNAQ-Vsoft CLI) is an open source tool that simplifies viral surveillance by NGS. This is a complex test that uses various sequencing metrics (e.g., genomic coverage x read depth) to detect testing failures.  SNAQ-SEQ SARS-CoV-2 RNA Internal Standards (IS) are spiked into every sample and provides missing QC to detect NGS test issues.
 
 To minimize disruption to a bioinformatic pipeline, the SNAQ-Vsoft CLI replaces a common step: the removal of human reads prior to further processing.
@@ -103,30 +102,30 @@ Command line parameters will indicate path to input and output files, along with
 
 Note: There is also an additional option of generating the basechange when provided amplicon sequences through the -b parameter.
 
-| Parameter      | Description
-| -------------- | -----------
-| 1)  input      | File path to input FASTQ or directory path to FASTQ files (directory should only consist of FASTQ files)
-| 2)  output     | Directory path to place analysis outputs.  $$$$What if user wants to specify file path?
-| 3)  rg         | File path of reference genome (FASTA format). The path directory must include bwa indices. The reference genome must also have:
-|                | - host/background, e.g., hg19
-|                | - IS amplicons (contig ID tagged with - SNAQ-IS)
-|                | - NT amplicons (contig ID with -SNAQ-NT)
-|                | - CC amplicons (contig ID tagged with -SNAQ-CC) 
-| 4)  bc         | Filepath to basechange file.
-| 5)  norm       | Filepath to IS amplicon normalization file.
-| 6)  outputSAM  | For troubleshooting purposes, instruct script to output NT & IS SAM files for good reads (-pass.sam), IS x NT recombinant (-recombinant.sam) or unmapped (-mapq.sam) (0=False, 1=True).
-| 7)  ofsCutoff  | Identify CC offspring that arise from sequencing errors of over duplicated complexity controls.  Offspring Cutoff is the fraction of maximum CC duplication, below which CC is concidered an NGS error and removed.  (float value, 0 to inactivate).
-| 8)  mfs        | Minimum fragment size: minimum fragment length for good read (integer value, -1 to inactivate).
-| 9)  RC         | Recombinant detection stringency: indicates how many recombinant bases allowed per read pair (integer value, must be >0).
-| 10) mapq       | Mapping quality stringency to be concidered a good read (integer value, -1 to inactivate).
-| 11) qCutoff    | Minimum Q score for good read for calling a base change position (integer value, -1 to inactivate).
-| 12) gbc        | Number of base change positions in a fragment for it to be considered valid (integer value, must be >0).
-| 13) outputIS   | Include IS reads in FASTQ output (0=False, 1=True).
-| 14) CC         | Number of complexity control copies spiked into the sample (integer value).
-| 15) IS         | Number of IS copies spiked into the sample. (integer values)
-| 16) VERSION    | Docker container version to use for analysis, leave blank to obtain newest version (string).
-| Additional     | 
-| 1)  -b         | Absolute filepath to amplicon sequences.
+| Parameter           | Description
+| ------------------- | -----------
+| 1)  input           | File path to input FASTQ or directory path to FASTQ files (directory should only consist of FASTQ files)
+| 2)  output          | Directory path to place analysis outputs.  $$$$What if user wants to specify file path?
+| 3)  rg              | File path of reference genome (FASTA format). The path directory must include bwa indices. The reference genome must also have:
+|                     | - host/background, e.g., hg19
+|                     | - IS amplicons (contig ID tagged with - SNAQ-IS)
+|                     | - NT amplicons (contig ID with -SNAQ-NT)
+|                     | - CC amplicons (contig ID tagged with -SNAQ-CC) 
+| 4)  bc              | Filepath to basechange file.
+| 5)  norm            | Filepath to IS amplicon normalization file.
+| 6)  outputSAM       | For troubleshooting purposes, instruct script to output NT & IS SAM files for good reads (-pass.sam), IS x NT recombinant (-recombinant.sam) or unmapped (-mapq.sam) (0=False, 1=True).
+| 7)  ofsCutoff       | Identify CC offspring that arise from sequencing errors of over duplicated complexity controls.  Offspring Cutoff is the fraction of maximum CC duplication, below which CC is concidered an NGS error and removed.  (float value, 0 to inactivate).
+| 8)  mfs             | Minimum fragment size: minimum fragment length for good read (integer value, -1 to inactivate).
+| 9)  RC              | Recombinant detection stringency: indicates how many recombinant bases allowed per read pair (integer value, must be >0).
+| 10) mapq            | Mapping quality stringency to be concidered a good read (integer value, -1 to inactivate).
+| 11) qCutoff         | Minimum Q score for good read for calling a base change position (integer value, -1 to inactivate).
+| 12) gbc             | Number of base change positions in a fragment for it to be considered valid (integer value, must be >0).
+| 13) outputIS        | Include IS reads in FASTQ output (0=False, 1=True).
+| 14) CC              | Number of complexity control copies spiked into the sample (integer value).
+| 15) IS              | Number of IS copies spiked into the sample. (integer values)
+| 16) VERSION         | Docker container version to use for analysis, leave blank to obtain newest version (string).
+| Additional          | 
+| 1)  -b              | Filepath used when creating the base change file, see help for more details.
 
 SNAQ-Vsoft will verify if the options were provided appropriately before proceeding.
 
