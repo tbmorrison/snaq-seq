@@ -149,9 +149,9 @@ CC=300
 IS=300
 VERSION=v1
 ```
-A log file may be obtained using 2>&1 log.txt
+A log file of the SNAQ-Vsoft CLI standard and error outputs may be obtained using:
 ```
-snaq-vsoft.sh <parameters > 2>&1 /path/to/log.txt
+snaq-vsoft.sh <parameters >> /path/to/log.txt 2>&1 
 ```
 
 ## <a name="docker"></a> Docker Container-
