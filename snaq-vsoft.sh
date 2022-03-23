@@ -170,7 +170,8 @@ if [[ "$1" == "-b" ]]; then
 	       output=true
                bc_prefix=$(echo ${2} | sed 's@.*/@@' | sed 's/\..*//g')
                bc_output=$(echo ${2} | sed 's/\/[^/]*$/\//')
-               docker run --rm -e bc_prefix="$bc_prefix" -e bc_output="$bc_output" -v $2:/home/basechange/reference_amplicon.fasta  -v $bc_output:/home/basechange/ -ti accugenomics/snaq-seq:pre /bin/bash /preliminary/init_bc.sh
+       	       docker pull accugenomics/snaq-seq:pre
+	       docker run --rm -e bc_prefix="$bc_prefix" -e bc_output="$bc_output" -v $2:/home/basechange/reference_amplicon.fasta  -v $bc_output:/home/basechange/ -ti accugenomics/snaq-seq:pre /bin/bash /preliminary/init_bc.sh
 	       fi
 	       exit
 	fi	
