@@ -483,7 +483,7 @@ if [[ ! "$1" == "-b" ]]; then
 fi
 
 if [[ ! "$1" == "-b" ]]; then
-        if [[ ! "$arg_1_option15" == "VERSION=" ]]; then
+        if [[ ! "$arg_1_option16" == "VERSION=" ]]; then
                 output=false
                 echo -e "***\n [ERROR] - The 'VERSION=' option is incorrect. Please run 'snaq-vsoft.sh -h' for more information. *** \n"
                 exit 1
