@@ -65,13 +65,17 @@ Compressed fastq files for single or paired read should be provided depending of
 
 #### Reference genome:
 
-SNAQ-Vsoft CLI uses the bwa aligner for the analysis which requires the reference genome (fasta format) and bwa indices. 
+SNAQ-Vsoft CLI uses the bwa aligner for the analysis which requires the reference genome (fasta format) and bwa indices. The reference genome is a single FASTA file containing human, viral and IS sequences.  The viral and IS are in the form of amplicons.  AccuGenomics will provide the viral and IS FASTA and the user will append this FASTA to their human FASTA (e.g., cat hg19.fasta ARTv31_NT_IS_CC_amplicons.fasta > hg19-ARTv31.fasta)
 
 SNAQ-SEQ will verify if there are existing bwa indices made available that can be used for the analysis.
 
-#### Reference amplicon:
+#### Base change file:
 
-The basechange amplicon is required to be provided in txt format. If missing, the script can generate this file from the reference genome FASTA.
+The basechange file maps the IS modified bases and is used to detect PCR template switching artifacts that create IS and NT recombinants.  This file is created using the -b option and the modified reference genome described above.
+```
+bash snaq-vsoft.sh -b /path/reference/genome/file.fasta
+```
+The base change file will be created in same directory as the reference genome.
 
 #### Normalization File:
 
@@ -125,7 +129,7 @@ Note: There is also an additional option of generating the basechange when provi
 | 15) IS              | Number of IS copies spiked into the sample. (integer values)
 | 16) VERSION         | Docker container version to use for analysis, leave blank to obtain newest version (string).
 | Additional          | 
-| 1)  -b              | Filepath used when creating the base change file, see help for more details.
+| 1)  -b              | Filepath used when creating the base change file, see base change file description for more details.
 
 SNAQ-Vsoft will verify if the options were provided appropriately before proceeding.
 
@@ -149,9 +153,9 @@ CC=300
 IS=300
 VERSION=v1
 ```
-A log file may be obtained using 2>&1 log.txt
+A log file of the SNAQ-Vsoft CLI standard and error outputs may be obtained using:
 ```
-snaq-vsoft.sh <parameters > 2>&1 /path/to/log.txt
+snaq-vsoft.sh <parameters >> /path/to/log.txt 2>&1 
 ```
 
 ## <a name="docker"></a> Docker Container-
