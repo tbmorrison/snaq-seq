@@ -1,11 +1,16 @@
 #!/usr/bin/env Rscript
-
-# CombineThreads.R - merge and summarize snaq-seq analysis 
-# 2022-03-16 update: impute missing values with 0s, handle missing component
-#   files (due to sample quality for some standards), ensure all amplicons
-#   in the normalization file are included in the output
+#
+# author: "David R. Lorenz"
+#
+# Usage: CombineThreads.R -inputPath -outputPath -normfactorsPath
+#
+# Intended Use: The following script reads SNAQ-Vsoft aggregated count data, fastq file summary, and run 
+# parameter files. Amplicon counts are merged, summary and QC statistics are calculated, and values are
+# exported to .csv file.
+#
+# Program flow: File import with cleaning -> data summation by sample and amplicon and merging ->
+# calculation of summary statistics. Missing (NA) values are imputed with zeros.
 # 
-# Usage CombineThreads.R -inputPath -outputPath -normfactorsPath
 
 myargs = commandArgs(trailingOnly=TRUE)
 
