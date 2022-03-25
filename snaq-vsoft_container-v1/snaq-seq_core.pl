@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl
 # author: "Thahmina A. Ali"
 #
-## Usage: perl /snaq-seq/snaq-seq-if_core.pl $inputFILE_fasta $genome_fasta $outsam $ofs $mfs $rc $mpq $qc $gbc $outis $cc $is 
+## Usage: perl /snaq-seq/snaq-seq_core.pl $inputFILE_fasta $genome_fasta $outsam $ofs $mfs $rc $mpq $qc $gbc $outis $cc $is 
 #
 ##      $inputDIR folder to paired end fastq files.
 ##      $genome_fasta reference genome fasta file name.
@@ -14,14 +14,13 @@
 #       $gbc - Number of base change positions in a fragment for it to be considered valid (integer value, must be >0).
 #       $outis - Include IS reads in FASTQ output (0=False, 1=True).
 #       $cc -   Number of complexity control copies spiked into the sample (integer value).
-#       $is - Number of IS copies spiked into the sample. (integer values)
+#       $is - Number of IS copies spiked into the sample. (integer values).
 #
 ## Intended Use: The following script executes the core analysis using the inputs provided from user argument initially collected by the initFILE.sh script. It is divided into four launch steps that prepares the inputs, performs the alignment and counting, prepares the count results, and generates the unified table of the snaq-vsoft analysis.   
 #
-## Program flow: It is divided into four launch steps that prepares the inputs such as setting up the pipeline commands in parrallel mode, performs the alignment and counting 
-# in parallel process.
+## Program flow: It is divided into four launch steps that prepares the inputs such as setting up the pipeline commands in parrallel mode, performs the alignment and counting in a subsequent fashion, gather read outputs in fastq output files and lastly performs the necessary calculations that produces final values resulted in a csv file (table).
 #
-## Example: perl /snaq-seq/snaq-seq-if_core.pl /home/data/input/ hg19 0 0.01 0 1 1 0  1 0 300 300 
+## Example: perl /snaq-seq/snaq-seq_core.pl /home/data/input/ hg19 0 0.01 0 1 1 0  1 0 300 300 
 
 
 
