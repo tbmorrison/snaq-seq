@@ -11,6 +11,8 @@
 # Program flow: File import with cleaning -> data summation by sample and amplicon and merging ->
 # calculation of summary statistics. Missing (NA) values are imputed with zeros.
 # 
+# Example:
+#   CombineThreads.R -/home/input/ -home/output/ -home/data/normalization/
 
 myargs = commandArgs(trailingOnly=TRUE)
 
