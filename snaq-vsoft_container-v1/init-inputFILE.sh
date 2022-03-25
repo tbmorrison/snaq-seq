@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 # author: "Thahmina A. Ali"
-
+#
+# Usage: bash /snaq-seq/init-inputFILE.sh 
+#  
+## Intended Use: The following script serves as the master script that initializes the entire analysis end to end for single fastq samples.    
+#
+#
+#Program flow: It is divided into two pathways that determines whether to include sam output files. It mainly handles the execution of the core analysis pipeline which are the perl scripts. The two pathways also generate the commandLine.txt and fastqCreationDate.txt meta data for the output csv table. 
+#
+## Example: bash /snaq-seq/init-inputFILE.sh
 
 export PATH=$PATH:/snaq-seq/
 export PATH=$PATH:/home/
