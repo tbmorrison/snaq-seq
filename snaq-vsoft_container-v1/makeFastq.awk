@@ -16,5 +16,4 @@
 	}
 }
 END {
-#	print "number of single reads: " np > "/dev/stderr"
 }
