@@ -127,7 +127,7 @@ Note: There is also an additional option of generating the basechange when provi
 | 13) outputIS        | Include IS reads in FASTQ output (0=False, 1=True).
 | 14) CC              | Number of complexity control copies spiked into the sample (integer value).
 | 15) IS              | Number of IS copies spiked into the sample. (integer values)
-| 16) VERSION         | Docker container version to use for analysis, leave blank to obtain newest version (string).
+| 16) VERSION         | Docker container version to use for analysis (string).
 | Additional          | 
 | 1)  -b              | Filepath used when creating the base change file, see base change file description for more details.
 
