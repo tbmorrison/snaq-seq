@@ -122,7 +122,7 @@ Note: There is also an additional option of generating the basechange when provi
 | 8)  mfs             | Minimum fragment size: minimum fragment length for good read (integer value, -1 to inactivate).
 | 9)  RC              | Recombinant detection stringency: indicates how many recombinant bases allowed per read pair (integer value, must be >0).
 | 10) mapq            | Mapping quality stringency to be concidered a good read (integer value, -1 to inactivate).
-| 11) qCutoff         | Minimum Q score for good read for calling a base change position (integer value, -1 to inactivate).
+| 11) qCutoff         | Minimum Q score for good read for calling a base change position (integer value, 0 to inactivate).
 | 12) gbc             | Number of base change positions in a fragment for it to be considered valid (integer value, must be >0).
 | 13) outputIS        | Include IS reads in FASTQ output (0=False, 1=True).
 | 14) CC              | Number of complexity control copies spiked into the sample (integer value).
