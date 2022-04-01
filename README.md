@@ -50,7 +50,7 @@ SNAQ-Vsoft CLI will verfiy both system requirements before proceeding.
 
 ```
 
-$ bash snaq-vsoft.sh input=/home/input/fastq output=/home/output rg=/home/input/ref bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1
+$ bash snaq-vsoft.sh input=/home/input/fastq output=/home/output rg=/home/input/ref bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 offspringCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1
 
 Linux system verified...
 
@@ -97,7 +97,7 @@ $ bash snaq-vsoft.sh -h
  
      Snaq-Seq: QC for viral surveillance NGS testing.     
 
-Usage: bash snaq-vsoft.sh input=/home/input/fastq/ output=/home/output rg=/home/input/ref/genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1
+Usage: bash snaq-vsoft.sh input=/home/input/fastq/ output=/home/output rg=/home/input/ref/genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 offspringCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1
 ```
 
 ## Parameters:
@@ -118,7 +118,7 @@ Note: There is also an additional option of generating the basechange when provi
 | 4)  bc              | Filepath to basechange file.
 | 5)  norm            | Filepath to IS amplicon normalization file.
 | 6)  outputSAM       | For troubleshooting purposes, instruct script to output NT & IS SAM files for good reads (-pass.sam), IS x NT recombinant (-recombinant.sam) or unmapped (-mapq.sam) (0=False, 1=True).
-| 7)  ofsCutoff       | Identify CC offspring that arise from sequencing errors of over duplicated complexity controls.  Offspring Cutoff is the fraction of maximum CC duplication, below which CC is concidered an NGS error and removed.  (float value, 0 to inactivate).
+| 7)  offspringCutoff       | Identify CC offspring that arise from sequencing errors of over duplicated complexity controls.  Offspring Cutoff is the fraction of maximum CC duplication, below which CC is concidered an NGS error and removed.  (float value, 0 to inactivate).
 | 8)  mfs             | Minimum fragment size: minimum fragment length for good read (integer value, -1 to inactivate).
 | 9)  RC              | Recombinant detection stringency: indicates how many recombinant bases allowed per read pair (integer value, must be >0).
 | 10) mapq            | Mapping quality stringency to be concidered a good read (integer value, -1 to inactivate).
@@ -134,7 +134,7 @@ Note: There is also an additional option of generating the basechange when provi
 SNAQ-Vsoft will verify if the options were provided appropriately before proceeding.
 
 ```
-$ bash snaq-vsoft.sh input=/home/input/fastq output=/home/output rg=/home/input/ref/genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1
+$ bash snaq-vsoft.sh input=/home/input/fastq output=/home/output rg=/home/input/ref/genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 offspringCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1
 
 input=/home/input/fastq
 output=/home/output
@@ -142,7 +142,7 @@ rg=/home/input/reference/genome.fasta
 bc=/home/input/amplicon_basechange.txt
 norm=/home/input/normalization.txt
 outputSAM=0
-ofsCutoff=0.01
+offspringCutoff=0.01
 mfs=0
 RC=1
 mapq=-1
