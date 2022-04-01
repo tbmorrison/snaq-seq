@@ -12,11 +12,11 @@ Help()
    echo
    echo FOLDER Usage:
    echo
-   echo "bash snaq-vsoft.sh inputDIR=/home/input/fastq/ output=/home/output/ rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1"
+   echo "bash snaq-vsoft.sh inputDIR=/home/input/fastq/ output=/home/output/ rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 offspringCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1"
    echo
    echo SINGLE SAMPLE Usage:
    echo
-   echo "bash snaq-vsoft.sh inputFILE=/home/input/fastq/foward_R1.fastq,/home/input/fastq/reverse_R2.fastq output=/home/output/ rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 ofsCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1"
+   echo "bash snaq-vsoft.sh inputFILE=/home/input/fastq/foward_R1.fastq,/home/input/fastq/reverse_R2.fastq output=/home/output/ rg=/home/input/reference_genome.fasta bc=/home/input/amplicon_basechange.txt norm=/home/input/normalization.txt outputSAM=0 offspringCutoff=0.01 mfs=0 RC=1 mapq=-1 qCutoff=0  gbc=1 outputIS=0 CC=300 IS=300 VERSION=v1"
    echo
    echo "Options:"
    echo
@@ -36,7 +36,7 @@ Help()
    echo "4)  bc=                        Filepath to basechange file."
    echo "5)  norm=                      Filepath to IS amplicon normalization file."
    echo "6)  outputSAM=                 For troubleshooting purposes, instruct script to output NT & IS SAM files for good reads (-pass.sam), IS x NT recombinant (-recombinant.sam) or unmapped (-mapq.sam) (0=False, 1=True)."
-   echo "7)  ofsCutoff=                 Identify CC offspring that arise from sequencing errors of over duplicated complexity controls. Offspring Cutoff is the fraction of maximum CC duplication, below which CC is concidered an NGS error and removed. (float value, 0 to inactivate)."
+   echo "7)  offspringCutoff=                 Identify CC offspring that arise from sequencing errors of over duplicated complexity controls. Offspring Cutoff is the fraction of maximum CC duplication, below which CC is concidered an NGS error and removed. (float value, 0 to inactivate)."
    echo "8)  mfs=                       Minimum fragment size: minimum fragment length for good read (integer value, -1 to inactivate)."
    echo "9)  RC=                        Recombinant detection stringency: indicates how many recombinant bases allowed per read pair (integer value, must be >0)."
    echo "10) mapq=                      Mapping quality stringency to be concidered a good read (integer value, -1 to inactivate)."
@@ -363,15 +363,15 @@ if [[ ! "$1" == "-b" ]]; then
 fi
 
 if [[ ! "$1" == "-b" ]]; then
-	if [[ ! "$arg_1_option7" == "ofsCutoff=" ]]; then
+	if [[ ! "$arg_1_option7" == "offspringCutoff=" ]]; then
         	output=false
-        	echo -e "***\n [ERROR] - The 'ofsCutoff=' option is incorrect. Please run 'snaq-vsoft.sh -h' for more information. *** \n"
+        	echo -e "***\n [ERROR] - The 'offspringCutoff=' option is incorrect. Please run 'snaq-vsoft.sh -h' for more information. *** \n"
         	exit 1
-	elif [ "$arg_1_option7" == "ofsCutoff=" ] && [[  "$arg_2_option7" =~ ^[0]\.[0-9]+$ ]] ; then
+	elif [ "$arg_1_option7" == "offspringCutoff=" ] && [[  "$arg_2_option7" =~ ^[0]\.[0-9]+$ ]] ; then
         	output=true
 	else
         	output=false
-        	echo -e "***\n [ERROR] - The ofsCutoff value is incorrect. Please run 'snaq-vsoft.sh -h' for more information. *** \n"
+        	echo -e "***\n [ERROR] - The offspringCutoff value is incorrect. Please run 'snaq-vsoft.sh -h' for more information. *** \n"
         	exit 1
 	fi
 fi
@@ -619,7 +619,7 @@ fi
 
 # If input is receiving single fastq set and options verified from user.
 if  [ $input = "inputFILE" ] ; then 
-    docker run --rm -e inputFILE_R1="$inputFILE_R1"  -e inputFILE_R2="$inputFILE_R2"  -e inputFILE_path="$inputFILE_path" -e inputFILE_fasta="$inputFILE_fasta" -e  genome_fasta="$genome_fasta"  -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15 -v $inputFILE_path:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:$tag_sel /bin/bash /snaq-seq/init-inputFILE.sh 
+    docker run --rm -e inputFILE_R1="$inputFILE_R1"  -e inputFILE_R2="$inputFILE_R2"  -e inputFILE_path="$inputFILE_path" -e inputFILE_fasta="$inputFILE_fasta" -e  genome_fasta="$genome_fasta"  -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15}  -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15 -v $inputFILE_path:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:$tag_sel /bin/bash #/snaq-seq/init-inputFILE.sh 
 fi
 
 exit
