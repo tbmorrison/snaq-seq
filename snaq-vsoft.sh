@@ -424,7 +424,7 @@ if [[ ! "$1" == "-b" ]]; then
         	output=false
         	echo -e "***\n [ERROR] - The 'qCutoff=' option is incorrect. Please run 'snaq-vsoft.sh -h' for more information. *** \n"
         	exit 1
-	elif [ "$arg_1_option11" == "qCutoff=" ] && [[  "$arg_2_option11" =~ ^-?[0-9]+$ ]]; then
+	elif [ "$arg_1_option11" == "qCutoff=" ] && [[  "$arg_2_option11" =~ ^[0-9]+$ ]]; then
         	output=true
 	else
         	output=false
