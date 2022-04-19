@@ -177,7 +177,7 @@ if [[ "$1" == "-b" ]]; then
                bc_prefix=$(echo ${2} | sed 's@.*/@@' | sed 's/\..*//g')
                bc_output=$(echo ${2} | sed 's/\/[^/]*$/\//')
        	       docker pull accugenomics/snaq-seq:pre
-	       docker run --rm -e bc_prefix="$bc_prefix" -e bc_output="$bc_output" -v $2:/home/basechange/reference_amplicon.fasta  -v $bc_output:/home/basechange/ -ti accugenomics/snaq-seq:pre /bin/bash /preliminary/init_bc.sh
+	       docker run --rm -e bc_prefix="$bc_prefix" -e bc_output="$bc_output" -v $bc_output:/home/basechange/ -ti accugenomics/snaq-seq:pre /bin/bash /preliminary/init_bc.sh
 	       fi
 	       exit
 	fi	
@@ -619,7 +619,7 @@ fi
 
 # If input is receiving single fastq set and options verified from user.
 if  [ $input = "inputFILE" ] ; then 
-    docker run --rm -e inputFILE_R1="$inputFILE_R1"  -e inputFILE_R2="$inputFILE_R2"  -e inputFILE_path="$inputFILE_path" -e inputFILE_fasta="$inputFILE_fasta" -e  genome_fasta="$genome_fasta"  -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15} -e option0=$option0   -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15 -v $inputFILE_path:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:$tag_sel /bin/bash /snaq-seq/init-inputFILE.sh 
+    docker run --rm -e inputFILE_R1="$inputFILE_R1"  -e inputFILE_R2="$inputFILE_R2"  -e inputFILE_path="$inputFILE_path" -e inputFILE_fasta="$inputFILE_fasta" -e  genome_fasta="$genome_fasta"  -e outsam="$6" -e ofs="$7" -e mfs="$8" -e rc="$9" -e mpq="${10}" -e qc="${11}"  -e gbc="${12}" -e outis=${13}   -e cc="${14}" -e is=${15} -e option0=$option0   -e option1=$option1 -e option2=$option2 -e option3=$option3 -e option4=$option4 -e option5=$option5 -e option6=$option6 -e option7=$option7 -e option8=$option8 -e option9=$option9 -e option10=$option10 -e option11=$option11 -e option12=$option12 -e option13=$option13 -e option14=$option14 -e option15=$option15 -v $inputFILE_path:/home/data/input  -v $output:/home/data/output -v $genome_path:/home/data/ref  -v $bc_amp:/home/data/basechange/amplicon_basechange.txt -v $norm_amp:/home/data/normalization/amplicon_normalization.txt -ti accugenomics/snaq-seq:$tag_sel /bin/bash #/snaq-seq/init-inputFILE.sh 
 fi
 
 exit
