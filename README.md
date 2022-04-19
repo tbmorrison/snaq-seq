@@ -121,7 +121,7 @@ Note: There is also an additional option of generating the basechange when provi
 | 7)  offspringCutoff       | Identify CC offspring that arise from sequencing errors of over duplicated complexity controls.  Offspring Cutoff is the fraction of maximum CC duplication, below which CC is concidered an NGS error and removed.  (float value, 0 to inactivate).
 | 8)  mfs             | Minimum fragment size: minimum fragment length for good read (integer value, -1 to inactivate).
 | 9)  RC              | Recombinant detection stringency: indicates how many recombinant bases allowed per read pair (integer value, must be >0).
-| 10) mapq            | Mapping quality stringency to be concidered a good read (integer value, -1 to inactivate).
+| 10) mapq            | Mapping quality stringency used to eliminate amplicon overlap reads from SNAQ analysis (integer value, -1 to inactivate, 10 recommneded).
 | 11) qCutoff         | Minimum Q score for good read for calling a base change position (integer value, 0 to inactivate).
 | 12) gbc             | Number of base change positions in a fragment for it to be considered valid (integer value, must be >0).
 | 13) outputIS        | Include IS reads in FASTQ output (0=False, 1=True).
