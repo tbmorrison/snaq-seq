@@ -22,8 +22,6 @@
 #
 ## Example: perl /snaq-seq/snaq-seq-if_core-sam.pl CV21_47_002_12-5_w-IS_S146 hg19 0 0.01 0 1 1 0  1 0 300 300
 
-
-
 use strict;
 use warnings;
 use Time::Piece;
@@ -31,22 +29,26 @@ use Time::Piece;
 system("clear");
 
 my $time = localtime->strftime('%Y-%m-%d_%H:%M:%S');
-my $inputFILE_fasta= $ARGV[0];
-my $genome_fasta= $ARGV[1];
-my $outputSAM= $ARGV[2];
-my $ofsCutoff= $ARGV[3];
-my $msf= $ARGV[4];
-my $RC= $ARGV[5];
-my $mapq= $ARGV[6];
-my $qCutoff= $ARGV[7];
-my $gbc = $ARGV[8];
-my $outputIS = $ARGV[9];
-my $CC= $ARGV[10];
-my $IS= $ARGV[11];
+my $inputFILE_R1= $ARGV[0];
+my $inputFILE_R2= $ARGV[1];
+my $inputFILE_fasta= $ARGV[2];
+my $genome_fasta= $ARGV[3];
+my $outputSAM= $ARGV[4];
+my $offspringCutoff= $ARGV[5];
+my $mfs= $ARGV[6];
+my $RC= $ARGV[7];
+my $mapq= $ARGV[8];
+my $qCutoff= $ARGV[9];
+my $gbc = $ARGV[10];
+my $outputIS = $ARGV[11];
+my $CC= $ARGV[12];
+my $IS= $ARGV[13];
 
 
+my $launch_1 = "mkdir /home/output/$time; mkdir /home/output/$time/$inputFILE_fasta; cd /home/ ; cp  /snaq-seq/snaq-seq-if_command-sam.sh /home/snaq-seq_launch-list.sh ; sed -i \'s/inputFILE_R1/$inputFILE_R1/g\' /home/snaq-seq_launch-list.sh; sed -i \'s/inputFILE_R2/$inputFILE_R2/g\' /home/snaq-seq_launch-list.sh;  sed -i \'s/FILE/$inputFILE_fasta/g\' /home/snaq-seq_launch-list.sh; sed -i \'s/TIME/$time/g\' /home/snaq-seq_launch-list.sh; sed -i \'s/GENOME/$genome_fasta/g\' /home/snaq-seq_launch-list.sh;  sed -i \'s/REPLACE/-v $offspringCutoff -v $mfs -v $RC -v $mapq -v $qCutoff -v $gbc -v $outputIS/g\' /home/snaq-seq_launch-list.sh; sed -i \'s/TIME/$time/g\' output_1.sh; sed -i \'s/,/;/g\' output_1.sh;  sed -i \'s/TIME/$time/g\' output_2.sh; cp /snaq-seq/snaq-vsoft_call.sh /home/$inputFILE_fasta.sh; sed -i \'s/TIME/$time/g\'  /home/$inputFILE_fasta.sh";
 
-my $launch_1 = "mkdir /home/output/$time; mkdir /home/output/$time/$inputFILE_fasta; cd /home/ ; cp  /snaq-seq/snaq-seq-if_command-sam.sh /home/; sed -i \'s/FILE/$inputFILE_fasta/g\' /home/snaq-seq-if_command-sam.sh; sed -i \'s/TIME/$time/g\' /home/snaq-seq-if_command-sam.sh; bash /home/snaq-seq-if_command-sam.sh; bash /snaq-seq/snaq-seq_launch.sh; sed -i \'s/TIME/$time/g\'  snaq-seq_launch_list.sh; sed -i \'s/TIME/$time/g\' snaq-seq_runs_list.sh;  sed -i \'s/GENOME/$genome_fasta/g\' snaq-seq_runs_list.sh;  sed -i \'s/REPLACE/-v $ofsCutoff -v $msf -v $RC -v $mapq -v $qCutoff -v $gbc -v $outputIS/g\' snaq-seq_runs_list.sh; sed -i \'s/TIME/$time/g\' output_1.sh; sed -i \'s/TIME/$time/g\' output_2.sh; sed -i \'s/FILE/$inputFILE_fasta/g\' output_1.sh; sed -i \'s/,/;/g\' output_1.sh; sed -i \'s/FILE/$inputFILE_fasta/g\' output_2.sh; bash snaq-seq_runs_list.sh"; 
+
+#my $launch_1 = "mkdir /home/output/$time; mkdir /home/output/$time/$inputFILE_fasta; cd /home/ ; cp  /snaq-seq/snaq-seq-if_command-sam.sh /home/snaq-seq_launch-list.sh ; sed -i \'s/inputFILE_R1/$inputFILE_R1/g\' /home/snaq-seq_launch-list.sh; sed -i \'s/inputFILE_R2/$inputFILE_R2/g\' /home/snaq-seq_launch-list.sh;  sed -i \'s/FILE/$inputFILE_fasta/g\' /home/snaq-seq_launch-list.sh; sed -i \'s/TIME/$time/g\' /home/snaq-seq_launch-list.sh; sed -i \'s/GENOME/$genome_fasta/g\' /home/snaq-seq_launch-list.sh;  sed -i \'s/REPLACE/-v $offspringCutoff -v $mfs -v $RC -v $mapq -v $qCutoff -v $gbc -v $outputIS/g\' /home/snaq-seq_launch-list.sh; sed -i \'s/TIME/$time/g\' output_1.sh; sed -i \'s/,/;/g\' output_1.sh;  sed -i \'s/TIME/$time/g\' output_2.sh; bash /home/snaq-seq_launch-list.sh"; 
 system($launch_1);
 wait;
 print "******************************************************\n";
@@ -62,28 +64,23 @@ print "\n";
 wait;
 
 print "\n";
-my $launch_2 = "bash /home/snaq-seq_launch_list.sh  ";
+my $launch_2 = "bash /home/$inputFILE_fasta.sh 2>> /home/error2 ";
 system($launch_2);
 print "\n";
 print "Snaq-seq analysis generating results...\n";
 print "\n";
 wait;
 
-my $launch_4 = "cd /home/output/$time/; cat /home/output/$time/*/PassCount.txt > /home/output/$time/PassCount.txt; cat /home/output/$time/*/BadCount.txt > /home/output/$time/BadCount.txt; cat /home/output/$time/*/BaseCount.txt > /home/output/$time/BaseCount.txt;  cat /home/output/$time/*/mapqCount.txt > /home/output/$time/mapqCount.txt; cat /home/output/$time/*/NMCount.txt > /home/output/$time/NMCount.txt; cat /home/output/$time/*/offTargetCount.txt > /home/output/$time/offTargetCount.txt; cat /home/output/$time/*/unmappedCount.txt > /home/output/$time/unmappedCount.txt;  cat /home/output/$time/*/ComplexityCount.txt > /home/output/$time/ComplexityCount.txt; bash /home/output_1.sh;  bash /home/output_2.sh";
-system($launch_4);
+
+my $launch_3 = "cd /home/output/$time/; cat -- '/home/output/$time/'*'/-PassCount.txt' > /home/output/$time/PassCount.txt; cat -- '/home/output/$time/'*'/-BadCount.txt' > /home/output/$time/BadCount.txt; cat -- '/home/output/$time/'*'/-BaseCount.txt' > /home/output/$time/BaseCount.txt;  cat -- '/home/output/$time/'*'/-mapqCount.txt' > /home/output/$time/mapqCount.txt; cat -- '/home/output/$time/'*'/-NMCount.txt' > /home/output/$time/NMCount.txt; cat -- '/home/output/$time/'*'/-offTargetCount.txt' > /home/output/$time/offTargetCount.txt; cat -- '/home/output/$time/'*'/-unmappedCount.txt' > /home/output/$time/unmappedCount.txt;  cat -- '/home/output/$time/'*'/-ComplexityCount.txt' > /home/output/$time/ComplexityCount.txt; cp /snaq-seq/snaq-seq-if_out-sam.sh /home/output/$time/; sed -i \'s/time/$time/g\' snaq-seq-if_out-sam.sh; sed -i \'s/sample/$inputFILE_fasta/g\' snaq-seq-if_out-sam.sh; bash snaq-seq-if_out-sam.sh; bash /home/output_1.sh;  bash /home/output_2.sh";
+system($launch_3);
 print "\n";
 print "Snaq-seq analysis finalizing...\n";
 print "\n";
 wait;
 
-my $launch_5 = "Rscript /snaq-seq/CombineThreads.R '/home/output/$time' '/home/data/output' '/home/data/normalization' >> /home/error2" ;
-#cp /home/output/$time/SNAQ-SEQ*  /home/data/output/$time/";
-system($launch_5);
+
+my $launch_4 = "Rscript /snaq-seq/CombineThreads.R '/home/output/$time' '/home/data/output' '/home/data/normalization'  $offspringCutoff >> /home/error2" ;
+system($launch_4);
 
 print "\n";
-
-
-
-
-
-
