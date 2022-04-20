@@ -1,7 +1,6 @@
-#!/usr/bin/awk
 
 ##usage: remRecombo.awk -v RC=recombinants per read cutoff
-##	-v minFragSize don't accept fragments smaller value.  bwa mem adds N's for <35 size frag causing NM estimate to be off
+##	-v mfs don't accept fragments smaller value.  bwa mem adds N's for <35 size frag causing NM estimate to be off
 ##	-v RC less than this value are acceptable recombinant events per read.
 ##	-v mapq=minimal MAPQ score
 ##	-v qCutoff=minimum qscore to count base change position or recombinant positive.
@@ -38,6 +37,7 @@ BEGIN {
 	poolCount=0
 	ccRegion=0
 	xs="!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+	if(qCutoff !=0){qCutoff=sprintf("%c",qCutoff+33)}
 }
 FNR==1{
 	FNUM++
@@ -136,12 +136,12 @@ FNUM==1{ #process lookup table, pick out sequential lower case REF as CC regions
 			exit 1
 		}
 	}
-	fragSize=length(tmp)
+	readSize=length(tmp)
 	if ($3 ~ /-SNAQ-CC$/) { # extract CC
 		if(samOutput){print $0 >> (resultsPath "-CC.sam")}
 		temp1=$3;split(temp1,arr,"-")
 		split(ccPos[arr[1]"-"arr[2]],ccRange,":") #first POS:last POS:first base:last base:lastAmp?
-		if($4 <= ccRange[1] && $4 + fragSize >= ccRange[2] && !($1 in CCc2)){ #CCc2 tracks read index, no double counting
+		if($4 <= ccRange[1] && $4 + readSize >= ccRange[2] && !($1 in CCc2)){ #CCc2 tracks read index, no double counting
 			t2 = ccRange[1] - $4 + 1
 			CCc2[$1] = 1
 			t1 = substr(tmp,t2, ccRange[2] - ccRange[1] + 1)
@@ -174,11 +174,11 @@ FNUM==1{ #process lookup table, pick out sequential lower case REF as CC regions
 				}
 			}
 		}
-		readPass1 = recomboFound < RC && $7=="=" #Instant fail: read pair will fail either read has recombo, chimera, 
-		readPass2 = ($5 >= mapq) && fragSize > minFragSize && (baseChange >= gbc ) #Fail only if singl or pair are both faile
+		#Fail only if singl or pair are both faile
 		##for debugging purposes
-		#if ($1=="M04993:95:000000000-J6C9M:1:1104:16388:19926"){
-		#	print $0 "\n" baseChange "\t" recomboFound "\t" lastQuery "\t" lastGoodRecord > "/dev/stderr"	
+		#if ($1=="NB552409:56:HJ3LVBGXK:3:13611:13789:6777"){
+		#	print tmpq "\n" tmp "\n" qCutoff > "/dev/stderr"
+		#	#print $0 "\n" baseChange "\t" recomboFound "\t" lastQuery "\t" lastGoodRecord > "/dev/stderr"	
 		#	}
 		if (single){
 	                readPass1 = recomboFound < RC #Instant fail: read pair will fail either read has recombo, chimera,
@@ -196,7 +196,7 @@ FNUM==1{ #process lookup table, pick out sequential lower case REF as CC regions
                 		}else{
                         		nmCount[$3]+=0 #some bwa mem sequence rows don't NM
                 		}
-                        	baseCount[$3]+=fragSize
+                        	baseCount[$3]+=readSize
                 	}else if (readPass1==0){
                         	NTRecomboCount[$3]++
                         	if(samOutput) {print $0 >> (resultsPath "-recombo.sam")} #for troubleshooting
@@ -204,54 +204,71 @@ FNUM==1{ #process lookup table, pick out sequential lower case REF as CC regions
                         	mapqCount[$3]++
                         	if(samOutput) {print $0 >> (resultsPath "-mapq.sam")} #for troubleshooting
                 	}
-		}else {
-	       		if (!lastQuery) {
-			#don't go through keep/reject logic on first read into script
-			} else if($1==lastQuery){#current read had same cluster as last read (i.e., read pair)
-				paired=1
-				if (lastReadPass1 && readPass1 && (lastReadPass2 || readPass2)) {
-                	        	readPass3=1 #current read pair pass
+		} else {
+                        split($12,temp,":")
+                        if(temp[1]=="NM"){
+                                NMValue=temp[3]
+                        }else{
+                                NMValue=0 #some bwa mem sequence rows don't NM
+                        }
+			if (lastQuery != $1) {
+	                        readPass1 = recomboFound < RC && $7=="=" #Instant fail: read pair will fail either read has recombo, chimera,
+	                	readPass2 = readSize >= mfs && (baseChange >= gbc ) #no frag size because first of two reads
+				#collect current read info as 'last'
+	                        split($12,temp,":")
+	                        if(temp[1]=="NM"){
+	                                lastNMValue=temp[3]
+	                        }else{
+	                                lastNMValue=0 #some bwa mem sequence rows don't NM
+	                        }
+	                        lastNMValue=NMValue
+				lastChrom=$3
+	                        lastQuery=$1
+	                        lastStart=$4
+	                        lastLength=readSize
+	                        lastEnd=$4 + readSize
+	                        lastGoodRecord=$0
+	                        lastReadPass2=readPass2
+	                        lastReadPass1=readPass1
+			} else {#current read had same cluster as last read (i.e., read pair)
+	                        if ($4 < lastStart) {
+	                                lastStart = $4
+	                        }
+	                        if (($4 + readSize) > lastEnd){
+	                                lastEnd = $4 + readSize
+	                        }
+	                        readPass1 = recomboFound < RC && $7=="=" #Instant fail: read pair will fail either read has recombo, chimera,
+                                readPass2 = (lastEnd - lastStart) >= mfs && (baseChange >= gbc )
+ 				if (lastReadPass1 && readPass1 && (lastReadPass2 || readPass2)) {
+                                        #output R1 & R2
+                                        if (outputIS || lastChrom ~/SNAQ-NT$/) {
+						print $0
+                                                print lastGoodRecord
+                                        }
+ 					if ($5 >= mapq) {#for SNAQ, remove amplicon overlap reads
+	                                        if(samOutput){
+        	                                        print lastGoodRecord >> (resultsPath "-pass.sam")
+                	                                print $0 >> (resultsPath "-pass.sam")
+                        	                }
+						NTPassCount[lastChrom]++
+                                        	nmCount[lastChrom]+=lastNMValue
+                                        	baseCount[lastChrom]+=lastLength
+						NTPassCount[$3]++
+                                        	nmCount[$3]+=NMValue
+                                        	baseCount[$3]+=readSize
+					} #could put mapq count stuff here..but it's sort of irrelevant for snaq
 				} else if (!lastReadPass1 || !readPass1) {#recombination read pair reject
-					readPass3=2
-                       		} else {#mapq readpair reject
-					readPass3=3
+                                        NTRecomboCount[lastChrom]++
+                                        if(samOutput) {print lastGoodRecord >> (resultsPath "-recombo.sam")} #for troubleshooting
+	                                NTRecomboCount[$3]++
+	                                if(samOutput) {print $0 >> (resultsPath "-recombo.sam")} #for troubleshooting
+				} else {
+                                        mapqCount[lastChrom]++ #These are reads that are too small or don't have basechange position
+                                        if(samOutput) {print lastGoodRecord >> (resultsPath "-mapq.sam")} #for troubleshooting
+					mapqCount[$3]++
+					if(samOutput) {print $0 >> (resultsPath "-mapq.sam")} #for troubleshooting
 				}
-			} else if (!paired){#not paired reads, so read stands on own merits
-				if(!lastReadPass1){
-					readPass3=2
-				}else if(!lastReadPass2){
-					readPass3=0
-				}else {
-					readPass3=1
-				}
-			}	
-			if (readPass3==1){#now generate outcome from read analysis
-	        	        if(samOutput){print lastGoodRecord >> (resultsPath "-pass.sam")}
-				if (outputIS || lastChrom ~/SNAQ-NT$/) {
-        	                	print lastGoodRecord
-                        	}
-         	                NTPassCount[lastChrom]++
-                	        nmCount[lastChrom]+=lastNMValue
-                        	baseCount[lastChrom]+=lastLength
-			}else if (readPass3==2){
-        	                NTRecomboCount[lastChrom]++
-				if(samOutput) {print lastGoodRecord >> (resultsPath "-recombo.sam")} #for troubleshooting
-			}else if (readPass3==3){
-				mapqCount[lastChrom]++
-				if(samOutput) {print lastGoodRecord >> (resultsPath "-mapq.sam")} #for troubleshooting
 			}
-			split($12,temp,":")
-			if(temp[1]=="NM"){
-				lastNMValue=temp[3]
-			}else{
-				lastNMValue=0 #some bwa mem sequence rows don't NM 
-			}
-			lastChrom=$3
-			lastQuery=$1
-			lastLength=fragSize
-			lastGoodRecord=$0
-			lastReadPass2=readPass2
-			lastReadPass1=readPass1
 		}
 	}
 }
