@@ -11,7 +11,7 @@ accugenomics/snaq-seq:"version/package"
 
 Release history:
 
-* v1.0 - March 22, 2022 - Core SNAQ-VSoft CLI functionality for paired-end reads, one sample per fastq file pair.
+* v1.0 - April 15, 2022 - Core SNAQ-VSoft CLI functionality for paired-end reads, one sample per fastq file pair.
 
 
 <h3>Pipeline contents/workflow</h3>
