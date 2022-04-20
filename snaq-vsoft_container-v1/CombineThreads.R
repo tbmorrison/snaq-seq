@@ -2,7 +2,7 @@
 #
 # author: "David R. Lorenz"
 #
-# Usage: CombineThreads.R -inputPath -outputPath -normfactorsPath
+# Usage: CombineThreads.R -inputPath -outputPath -normfactorsPath -offSpringFraction
 #
 # Intended Use: The following script reads SNAQ-Vsoft aggregated count data, fastq file summary, and run 
 # parameter files. Amplicon counts are merged, summary and QC statistics are calculated, and values are
@@ -12,15 +12,17 @@
 # calculation of summary statistics. Missing (NA) values are imputed with zeros.
 # 
 # Example:
-#   CombineThreads.R -/home/input/ -home/output/ -home/data/normalization/
+#   CombineThreads.R -/home/input/ -home/output/ -home/data/normalization/ -offSpringFraction
 
 myargs = commandArgs(trailingOnly=TRUE)
 
 path = myargs[1]
 path2 = myargs[2]
 path3 = myargs[3] #/home/data/normalization
+offSpringFraction = myargs[4]
 
-offSpringFraction=0.01
+offSpringFraction <- as.numeric(gsub("^.*=", "", offSpringFraction))
+
 separator=","
 
 
@@ -42,14 +44,19 @@ names(norm) <- c("CHROM", "NORMALIZER")
 norm$NORMALIZER <- as.numeric(norm$NORMALIZER)
 
 # define sample - amplicon combinations for NT and IS reads
-samp_amp <- expand.grid(singleTable$FASTQ_File_Name, 
-        c(norm$CHROM, gsub("-NT$", "-IS", norm$CHROM)),
-        stringsAsFactors = F)
-names(samp_amp) <- c("FASTQ_File_Name", "amplconName")
+#   ensuring normalization file has no duplicates for -NT/-IS
+samp_amp <- expand.grid(
+    singleTable$FASTQ_File_Name,
+    unique(c(norm$CHROM, gsub("-NT$", "-IS", norm$CHROM))), 
+    c("NT", "IS"),
+    stringsAsFactors = F)
+names(samp_amp) <- c("FASTQ_File_Name", "ampNum", "type")
+samp_amp$ampNum <- 
+    gsub("Amp","", sapply(strsplit(samp_amp$ampNum,"-"),"[",2))
 
 # define file column names 
 counts_colnames <- list(
-    badCount=c("FASTQ_File_Name","amplconName","badCount"),
+    BadCount=c("FASTQ_File_Name","amplconName","badCount"),
     BaseCount=c("FASTQ_File_Name","amplconName","baseCount"),
     ComplexityCount=c("FASTQ_File_Name","amplconName","seq","CCcount"),
     NMCount=c("FASTQ_File_Name","amplconName","NMCount"),
@@ -61,14 +68,19 @@ counts_colnames <- list(
 
 ## function to load and clean counts - sample-amplicon data tables 
 f_fh <- function(fh, in_path, col_names) {
-      
+
     df <- data.frame()
-    if (file.exists(paste0(in_path, "/", fh))) {
+
+    if (file.exists(paste0(in_path, "/", fh)) &&
+            file.size(file.path(in_path, fh))==0) {  # file w/ 0 bytes
+        df <- as.data.frame(matrix(0, ncol=length(col_names), nrow=1))
+        names(df) <- col_names
+     } else if (file.exists(paste0(in_path, "/", fh))) {  # file with data
         df <- read.table(file=file.path(in_path, fh), 
             header=F, sep="\t", stringsAsFactors=F, as.is=T, comment.char="", 
             quote="")
         names(df) <- col_names
-    } else {
+     } else {
         df <- as.data.frame(matrix(0, ncol=length(col_names), nrow=1))
         names(df) <- col_names
     }
@@ -84,6 +96,7 @@ f_fh <- function(fh, in_path, col_names) {
                0,
                df[[grep("count", names(df), ignore.case=T, value=T)]])
     
+   
     return(df)
 }
 
@@ -91,36 +104,96 @@ f_fh <- function(fh, in_path, col_names) {
 ## create dataTable with successive merges
 # PassCount
 temp <- f_fh("PassCount.txt", path, unlist(counts_colnames$PassCount))
-dataTable <- aggregate(passCount~FASTQ_File_Name+amplconName, data=temp, sum)
+
+if(all(temp[1,]==0)) {  # no passCount data
+    dataTable <- samp_amp
+    dataTable$passCount <- 0
+} else {
+    dataTable <- 
+        aggregate(passCount ~ FASTQ_File_Name + amplconName, data=temp, sum)
+    dataTable$ampNum <- 
+        gsub("Amp","", sapply(strsplit(dataTable$amplconName,"-"),"[",2))
+    dataTable$type <- sapply(strsplit(dataTable$amplconName,"-"),"[",5)
+    dataTable <- subset(dataTable, select=-amplconName)
+    dataTable <- 
+        merge(samp_amp, dataTable,
+              by=c("FASTQ_File_Name", "ampNum", "type"), all.x=T)
+}
 
 # BadCount
-temp <- f_fh("badCount.txt", path, unlist(counts_colnames$badCount))
-dataTable <- merge(dataTable,
-    aggregate(badCount ~ FASTQ_File_Name + amplconName, data=temp, sum),
-    by=c("FASTQ_File_Name", "amplconName"), all.x=T)
+temp <- f_fh("BadCount.txt", path, unlist(counts_colnames$BadCount))
+
+if(all(temp[1,]==0)) {  # no badCount data
+    dataTable$badCount <- 0
+} else {
+    temp <- 
+        aggregate(badCount ~ FASTQ_File_Name + amplconName, data=temp, sum)
+    temp$ampNum <- 
+        gsub("Amp","", sapply(strsplit(temp$amplconName,"-"),"[",2))
+    temp$type <- sapply(strsplit(temp$amplconName,"-"),"[",5)
+    temp <- subset(temp, select=-amplconName)
+    dataTable <- 
+        merge(dataTable, temp,
+              by=c("FASTQ_File_Name", "ampNum", "type"), all.x=T)
+}
 
 # BaseCount
 temp <- f_fh("BaseCount.txt", path, unlist(counts_colnames$BaseCount))
-dataTable <- merge(dataTable,
-    aggregate(baseCount ~ FASTQ_File_Name + amplconName, data=temp, sum),
-    by=c("FASTQ_File_Name", "amplconName"), all.x=T)
 
-# BaseCount
+if(all(temp[1,]==0)) {  # no baseCount data
+    dataTable$baseCount <- 0
+} else {
+    temp <- 
+        aggregate(baseCount ~ FASTQ_File_Name + amplconName, data=temp, sum)
+    temp$ampNum <- 
+        gsub("Amp","", sapply(strsplit(temp$amplconName,"-"),"[",2))
+    temp$type <- sapply(strsplit(temp$amplconName,"-"),"[",5)
+    temp <- subset(temp, select=-amplconName)
+    dataTable <- 
+        merge(dataTable, temp,
+              by=c("FASTQ_File_Name", "ampNum", "type"), all.x=T)
+}
+  
+# mapqCount
 temp <- f_fh("mapqCount.txt", path, unlist(counts_colnames$mapqCount))
-dataTable <- merge(dataTable,
-    aggregate(mapqCount ~ FASTQ_File_Name + amplconName, data=temp, sum),
-    by=c("FASTQ_File_Name", "amplconName"), all.x=T)
+
+if(all(temp[1,]==0)) {  # no mapqCount data
+    dataTable$mapqCount <- 0
+} else {
+    temp <- 
+        aggregate(mapqCount ~ FASTQ_File_Name + amplconName, data=temp, sum)
+    temp$ampNum <- 
+        gsub("Amp","", sapply(strsplit(temp$amplconName,"-"),"[",2))
+    temp$type <- sapply(strsplit(temp$amplconName,"-"),"[",5)
+    temp <- subset(temp, select=-amplconName)
+    dataTable <- 
+        merge(dataTable, temp,
+              by=c("FASTQ_File_Name", "ampNum", "type"), all.x=T)
+}
 
 # NMCount
 temp <- f_fh("NMCount.txt", path, unlist(counts_colnames$NMCount))
-dataTable <- merge(dataTable,
-    aggregate(NMCount ~ FASTQ_File_Name + amplconName, data=temp, sum),
-    by=c("FASTQ_File_Name", "amplconName"), all.x=T)
+if(all(temp[1,]==0)) {  # no NMCount data
+    dataTable$NMCount <- 0
+} else {
+    temp <- 
+        aggregate(NMCount ~ FASTQ_File_Name + amplconName, data=temp, sum)
+    temp$ampNum <- 
+        gsub("Amp","", sapply(strsplit(temp$amplconName,"-"),"[",2))
+    temp$type <- sapply(strsplit(temp$amplconName,"-"),"[",5)
+    temp <- subset(temp, select=-amplconName)
+    dataTable <- 
+        merge(dataTable, temp,
+              by=c("FASTQ_File_Name", "ampNum", "type"), all.x=T)
+}
 
 
 ## collect single calculation fields
 # offTargetCount
-if (file.exists(paste0(path, "/", "offTargetCount.txt"))) {
+if (file.exists(paste0(path, "/", "offTargetCount.txt")) &&
+        file.size(file.path(path, "offTargetCount.txt"))==0) {
+    temp <- as.data.frame(matrix(0, ncol=2, nrow=1))
+} else if (file.exists(paste0(path, "/", "offTargetCount.txt"))) {
     temp <- read.table(file=file.path(path, "offTargetCount.txt"), 
         header=F, sep="\t", stringsAsFactors=F, as.is=T, comment.char="", 
         quote="")
@@ -141,7 +214,10 @@ colnames(temp) <- c("FASTQ_File_Name","commandLine")
 singleTable <- merge(singleTable, temp, by="FASTQ_File_Name", all=T)
 
 # unmappedCount
-if (file.exists(paste0(path, "/", "unmappedCount.txt"))) {
+if (file.exists(paste0(path, "/", "unmappedCount.txt")) &&
+        file.size(file.path(path, "unmappedCount.txt"))==0) {
+    temp <- as.data.frame(matrix(0, ncol=2, nrow=1))
+} else if (file.exists(paste0(path, "/", "unmappedCount.txt"))) {
     temp <- read.table(file=file.path(path, "unmappedCount.txt"), 
         header=F, sep="\t", stringsAsFactors=F, as.is=T, comment.char="", 
         quote="")
@@ -156,15 +232,20 @@ singleTable <-
         by="FASTQ_File_Name", all=T)
 
 # ComplexityCount
-if (file.exists(paste0(path, "/", "ComplexityCount.txt"))) {
+# file with 0 lines
+if (file.exists(paste0(path, "/", "ComplexityCount.txt")) &&
+        file.size(file.path(path, "ComplexityCount.txt"))==0) {
+    temp <- as.data.frame(matrix(0, ncol=4, nrow=1))
+# normal file
+} else if (file.exists(paste0(path, "/", "ComplexityCount.txt"))) {
     temp <- read.table(file=file.path(path, "ComplexityCount.txt"), 
         header=F, sep="\t", stringsAsFactors=F, as.is=T, comment.char="", 
         quote="")
+# file does not exist
 } else {
     temp <- as.data.frame(matrix(0, ncol=4, nrow=1))
-}  
+}
 names(temp) <- unlist(counts_colnames$ComplexityCount)
-
 
 # ComplexityCount if any nonzero counts
 if (!(all (temp$CCcount==0))) {
@@ -198,9 +279,7 @@ if (!(all (temp$CCcount==0))) {
 }
 
 
-#clean up dataTable headers
-dataTable$ampNum <- gsub("Amp","", sapply(strsplit(dataTable$amplconName,"-"),"[",2))
-dataTable$type <- sapply(strsplit(dataTable$amplconName,"-"),"[",5)
+##clean up dataTable headers
 dataTable <- dataTable[!is.na(dataTable$type),]
 dataTable[is.na(dataTable)] <- 0
 
@@ -218,10 +297,11 @@ abundanceTable$abundance <-
     abundanceTable$passCount.x/abundanceTable$passCount.y*abundanceTable$IS
 norm_a <- norm
 norm_a$CHROM <- gsub("Amp","", sapply(strsplit(norm_a$CHROM,"-"),"[",2))
-abundanceTable$abundance <-
-    round(abundanceTable$abundance*norm_a$NORMALIZER[match(abundanceTable$ampNum, norm_a$CHROM)])
-abundanceTable[is.na(abundanceTable)] <- 0
 
+abundanceTable$abundance <-
+    abundanceTable$abundance*norm_a$NORMALIZER[match(abundanceTable$ampNum, 
+                                                     norm_a$CHROM)]
+abundanceTable[is.na(abundanceTable)] <- 0
 
 # calculate VL
 viralLoad <- setNames(aggregate(abundance~FASTQ_File_Name, 
@@ -243,7 +323,6 @@ temp <- setNames(aggregate(NMCount~FASTQ_File_Name,
     data=dataTable[dataTable$type=="IS",], median), c("FASTQ_File_Name","ISNMCount"))
 singleTable <- merge(singleTable, temp, by="FASTQ_File_Name",all.x = T)
 
-
 #median base count
 temp <- setNames(aggregate(baseCount~FASTQ_File_Name,
     data=dataTable[dataTable$type=="NT",], median), c("FASTQ_File_Name","NTBaseCount"))
@@ -253,7 +332,8 @@ temp <- setNames(aggregate(baseCount~FASTQ_File_Name,
 singleTable <- merge(singleTable, temp, by="FASTQ_File_Name", all.x = T)
 
 #bad Read Rate per amplicon
-dataTable$nmRate <- dataTable$NMCount/dataTable$baseCount
+dataTable$nmRate <- 
+    ifelse(dataTable$NMCount==0, 0, dataTable$NMCount/dataTable$baseCount)
 temp <- setNames(aggregate(nmRate~FASTQ_File_Name,
     data=dataTable[dataTable$type=="IS",], median), c("FASTQ_File_Name","ISNMRate"))
 singleTable <- merge(singleTable,temp,by="FASTQ_File_Name", all.x = T)
@@ -288,7 +368,10 @@ ampliconOutput <- merge(ampliconOutput, singleTable[, c("FASTQ_File_Name","ccYie
 ampliconOutput$ampliconCoverage <- ampliconOutput$abundance * ampliconOutput$ccYield
 
 #median recombination rate
-dataTable$medRecRate <- dataTable$badCount/(dataTable$badCount+dataTable$passCount+dataTable$mapqCount)
+dataTable$medRecRate <- 
+    ifelse(dataTable$badCount+dataTable$passCount+dataTable$mapqCount==0,
+        0,
+        dataTable$badCount/(dataTable$badCount+dataTable$passCount+dataTable$mapqCount))
 temp <- setNames(aggregate(medRecRate~FASTQ_File_Name,data=dataTable[dataTable$type=="NT",],median),
                  c("FASTQ_File_Name","NTrecombinantRate"))
 singleTable <- merge(singleTable,temp,by="FASTQ_File_Name",all.x = T)
@@ -300,14 +383,7 @@ singleTable <- merge(singleTable,temp,by="FASTQ_File_Name",all.x = T)
 ampliconOutput <- ampliconOutput[ampliconOutput$FASTQ_File_Name != "0",]
 singleTable <- singleTable[singleTable$FASTQ_File_Name != "0",]
 
-# ensure no amplicons missing due to missing files/amplicons in CC
-samp_amp_a <- samp_amp[(!grepl("IS", samp_amp$amplconName)), ]
-samp_amp_a$ampNum <- gsub("Amp","", sapply(strsplit(samp_amp_a$amplconName,"-"),"[",2))
-
-ampliconOutput <- merge(samp_amp_a[c("FASTQ_File_Name", "ampNum")], 
-       ampliconOutput, by=c("FASTQ_File_Name", "ampNum"), all.x=T)
-
-# impute missing values introduced by coercion with 0
+# impute missing values introduced through merges with 0
 ampliconOutput[is.na(ampliconOutput)] <- 0
 
 #sort amplicon output for output
@@ -363,8 +439,6 @@ singleTable$output <-
         function(x) paste(ampliconOutput$mapqCount.y[ampliconOutput$FASTQ_File_Name==x],collapse = ",")), # IBA001 IS mapq counts by amplicon
         sep=separator)
 
-singleTable$output[1]
-
 headerFields <- c("FASTQ_File_Name", "FASTQ_File_Date", "SNAQ-SEQ_Analysis_Date", 
     "SNAQ-SEQ_Command_Line", "Viral_Load", "Unique_CC_Count", "Fraction_CC_PASS", "%CC",
     "Median_CC_Duplication_Rate", "Median_Recombination_Rate_IS", "Median_Recombination_Rate_NT", 
@@ -377,9 +451,21 @@ headerFields <- c("FASTQ_File_Name", "FASTQ_File_Date", "SNAQ-SEQ_Analysis_Date"
     paste0("NN", norm_a$CHROM), paste0("IN", norm_a$CHROM), paste0("NB", norm_a$CHROM), 
     paste0("IB", norm_a$CHROM), paste0("NBA", norm_a$CHROM), paste0("IBA", norm_a$CHROM))
 
-headerString <- paste(headerFields, collapse=", ")
+headerString <- paste(headerFields, collapse=",")
+#headerString <- paste(headerFields, collapse=", ")
 
-write.table(c(headerString,singleTable$output), 
-    file=file.path(path2,paste0("SNAQ-SEQ-Analysis", "-",
-        format(Sys.time(), "%Y%m%d_%H%M%S"),".csv")),quote = F, col.names = F, row.names = F)
-
+# for single reads: append to most recent previous SNAQ-SEQ analysis file if present
+if (nrow(singleTable) == 1 & (any(grepl("SNAQ-SEQ-Analysis", dir(path2))))) {
+    outfile_name <- 
+        paste0(path2, "/",
+            rev(sort(grep("SNAQ-SEQ-Analysis-[0-9]+_[0-9]+.csv", dir(path2), 
+                          value=T)))[1])
+    write.table(singleTable$output, 
+        file=outfile_name, quote = F, col.names = F, row.names = F, append = T)
+} else {
+    outfile_name <- 
+        paste0(path2, "/", "SNAQ-SEQ-Analysis", "-", format(Sys.time(), 
+            "%Y%m%d_%H%M%S"),".csv")
+    write.table(c(headerString,singleTable$output), 
+        file=outfile_name, quote = F, col.names = F, row.names = F)
+}
