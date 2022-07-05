@@ -1,0 +1,239 @@
+#!/bin/bash -e
+
+##script -f1 <path/fastqR1>
+##	-f2 <path/fastqR2 (if paired)> 
+##	-o <path/outputDir (inputPath)> 
+##	-r <path/refGenome.fasta>
+##	-bc <path/basechange.txt>
+##	-sd <scratchDir (outputPath)> 
+##	-t <threads (machine)>
+##	-bo <BAMoutput (0)> 
+##	-cco <offspring Cutoff float (0.01)> 
+##	-mf <minFragSize integer (-1)> 
+##	-rc <Recombinant Count (1)> 
+##	-mq <mapq Cutoff integer (-1)> 
+##	-mbc <min base change (1)> 
+##	-oi <include IS in fastq (0)> 
+##	-of <output results file path>
+##goal create new fastq with just NT, if needed make bam of PASS, recombinant, non-mappable IS & NT
+## Flow: parameter QC; bwa create sam files for multithreading; awk filters sam & creates fastq & ,if needed,
+##	results specific sam; join sam->outputPath/bam; join fastq->outputPath/file.fastq.gz; 
+##	join aggregate count.txt->outputPath/txt
+
+#process arguments
+if [[ ! -f ${f1} ]];then
+	echo "${f1} fasta R1 file does not exist"
+	exit 1
+fi
+if [[ ! ${f1} == *.fastq ]] && [[ ! ${f1} == *.fastq.gz ]];then
+	echo "${f1} not a fastq file"
+	exit 1
+fi
+if [[ ! -f ${f2} ]];then
+        echo "${f2} fasta R2 file does not exist"
+        exit 1
+fi
+if [[ ! ${f2} == *.fastq ]] && [[ ! ${f2} == *.fastq.gz ]];then
+        echo "${f2} not a fastq file"
+        exit 1
+fi
+if [[ ! -d ${op} ]];then
+    if ! mkdir -p ${op} 2>/dev/null;then
+	    echo "Unable to create output directory ${op}"
+        exit 1
+    fi
+fi
+po="${op%/}"
+if [[ ! -f ${rg} ]];then
+    echo "$(basename ${rg}) reference file does not in $(dirname ${rg})"
+        exit 1
+fi
+ref="${rg}"
+if [[ ! -f ${nf} ]];then
+    echo -e "$(basename ${nf}) normalizer file does not exist in $(dirname ${rg})"
+         exit 1
+fi
+if [[ ! -f ${bc} ]];then
+    echo "$(basename ${bc}) base change file does not exist in $(dirname ${rg})"
+        exit 1
+fi
+temp="${sd%/}"
+if [[ ! -d ${temp} ]];then
+        if ! mkdir -p ${temp} 2>/dev/null;then
+                echo "Unable to create scratch directory $temp"
+                exit 1
+        fi
+fi
+sd="${temp}"
+
+if [ ! -f "${of}" ];then
+    if ! touch "${of}";then
+	    echo "Unable to create results file $of"
+        exit 1
+    fi
+    rm -f "${of}"
+fi
+
+threads="${th}"
+re='^[0-9]+$'
+if ! [[ ${th} =~ $re ]];then
+	echo "Threads must be an integer"
+    threads=$(($(grep -c processor /proc/cpuinfo)/2))
+    threads=${thread%.*}
+    echo "Setting Threads to $threads" 
+fi
+
+if [ ! ${bo} == 1 ] && [ ! ${bo} == 0 ];then
+	echo "Setting SNAQ bam output to false"
+    bo=0
+fi
+
+re='^0.[0-9]+$'
+if ! [[ ${cco} =~ $re ]];then
+                echo "Setting CC offspring cutoff to 0.01 (must be value between 0 to 1"
+                cco=0.01
+fi
+
+re='^[+-]?[0-9]+$'
+if ! [[ ${mf} =~ $re ]];then
+    echo "Setting minimum fragment size to ignore (0)"
+        mf=0
+fi
+
+re='^[+-]?[0-9]+$'
+if ! [[ ${qs} =~ $re ]];then
+    echo "Setting minimum base qscore to ignore (-1)"
+        exit 1
+fi
+
+re='^[0-9]+$'
+if ! [[ ${rc} =~ $re ]];then
+        echo "Setting rejected recombinant base count per fragment to 1"
+        rc=1
+fi
+
+re='^[+-]?[0-9]+$'
+if ! [[ ${mq} =~ $re ]];then
+        echo "Setting mapq filter to 10 to prevent adjacent amplicon spillover"
+        mq=10
+fi
+
+re='^[0-9]+$'
+if ! [[ ${mbc} =~ $re ]];then
+        echo "Setting minimum base count per fragment to 1"
+        mbc=1
+fi
+
+if [[ ! ${oi} == 1 ]] && [[ ! ${oi} == 0 ]];then
+    echo "Not exporting IS in fastq output (0)"
+        oi=0
+fi
+
+re='^[0-9]+$'
+if ! [[ ${cc} =~ $re ]];then
+        echo "Copies of Complexity Control Spike-in must be an integer"
+        exit 1
+fi
+
+re='^[0-9]+$'
+if ! [[ ${is} =~ $re ]];then
+        echo "Copies of Internal Standard Spike-in must be an integer"
+        exit 1
+fi
+
+
+fn1=$(basename "${f1%.gz}")
+fn1="${fn1%.fastq}"
+
+if [[ -z ${f2} ]];then
+	single=1
+else
+	single=0
+	fn2=$(basename "${f2%.gz}")
+	fn2="${fn2%.fastq}"
+fi
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+awkScript="$SCRIPT_DIR/remRecombo.awk"
+makeFastq="$SCRIPT_DIR/makeFastq.awk"
+combineScript="$SCRIPT_DIR/CombineThreads.R"
+
+cmdLine="snaq -f1 ${f1} -f2 ${f2} -o ${po} -r ${ref} -bc ${bc} -t ${threads} -bo ${bo} -cco ${cco} -mf ${mf} -rc ${rc} -mq ${mq} -mbc ${mbc} -oi ${oi} -qs ${qs} -cc ${cc} -is ${is} -nf ${nf} -sd ${sd} -of ${of}"
+
+echo $(date +"%Y-%m-%d %T")" STARTING $fn1"
+echo $(date +"%Y-%m-%d %T")" $cmdLine"
+
+rm -f "${sd}/"*".sam"
+rm -f "${sd}/"*"Count.txt"
+
+if [ $single == 0 ];then
+	echo $(date +"%Y-%m-%d %T")" $fn1 aligning read pairs"
+	bwa mem -v 1 -t $threads $ref $f1 $f2 2>/dev/null |\
+	awk -v path="${sd}" -v threads=$threads 'BEGIN {tick=100}/@/{print $0 >> (path "/temp-101.sam")}!/^@/{pairFound=0;tick++;if(tick>threads+100){tick=101}temp=$1;temp1=$0;while(!pairFound){getline;if(temp==$1){pairFound=1;print temp1 >> (path "/temp-" tick ".sam");print $0 >> (path "/temp-" tick ".sam")}else{temp=$1;temp1=$0}}}' -
+
+	echo $(date +"%Y-%m-%d %T")" $fn1 SNAQ-SEQ analysis"
+	for (( i=101; i<=(( $threads + 100 )); i++ ))
+	do
+		awk -f $awkScript -v single=$single -v resultsPath="${sd}/Temp-${i}" -v samOutput=$bo -v offspringCutoff=$coo -v minFragSize=$mf -v RC=$rc -v mapq=$mq -v qCutoff=$qs -v gbc=$mbc -v outputIS=$oi -v sampleName="${f1}" "${bc}" "${sd}/temp-$i.sam" |\
+		awk -f $makeFastq -v file1="${sd}/Temp_R1_part-$i.fastq" -v file2="${sd}/Temp_R2_part-$i.fastq" - &
+		Th[$i]=${!}
+	done
+else
+	echo $(date +"%Y-%m-%d %T")" $fn1 aligning reads"
+	bwa mem -v 1 -t $threads $ref $f1 2>/dev/null |\
+awk -v path=$sd -v threads=$threads 'BEGIN {tick=100}/@/{print $0 >> (path "/temp-101.sam")}!/^@/{tick++;if(tick>threads+100){tick=101}{print $0 >> (path "/temp-" tick ".sam")}}' -
+
+	echo $(date +"%Y-%m-%d %T")" $fn1 SNAQ-SEQ analysis"
+        for (( i=101; i<=(( $threads + 100 )); i++ ))
+        do
+                awk -f $awkScript -v single=$single -v resultsPath="${sd}/Temp-${i}" -v samOutput=$bo -v offspringCutoff=$coo -v minFragSize=$mf -v RC=$rc -v mapq=$mq -v qCutoff=$qs -v gbc=$mbc -v outputIS=$oi -v sampleName="${f1}" "${bc}" "$sd/temp-$i.sam" >> "$sd/Temp_R1_part-$i.fastq" &
+                Th[$i]=${!}
+        done
+
+fi
+
+#wait for threads to complete
+for (( i=101; i< (( $threads + 100 )) ; i++))
+do
+        wait ${Th[$i]}
+done
+
+echo $(date +"%Y-%m-%d %T")" $fn1 aggregating FASTQ"
+if [[ $single == 0 ]];then
+	rm -f "${po}/${fn1}.fastq.gz" "${po}/${fn2}.fastq.gz"
+	for file in $(ls "$sd/Temp_R1_part-"*".fastq"); do bgzip -c -@ $threads $file >> "${po}/${fn1}.fastq.gz"; done
+	for file in $(ls "$sd/Temp_R2_part-"*".fastq"); do bgzip -c -@ $threads $file >> "${po}/${fn2}.fastq.gz"; done
+else
+	rm -f "${po}/${f1n}.fastq.gz"
+        for file in $(ls "$sd/Temp_R1_part-"*".fastq"); do bgzip -c -@ 30 $file >> "${po}/${fn1}.fastq.gz"; done
+fi
+
+if [[ $bo == 1 ]]; then
+echo $(date +"%Y-%m-%d %T")" $fn1 BAM creation"
+	if ls "${sd}/Temp-"*"-pass.sam" 1> /dev/null 2>&1;then
+		cat "${sd}/Temp-"*"-pass.sam" | samtools sort -@ $threads -m 1G -O bam -o "${po}/${fn1}-pass.bam" 2>/dev/null 
+	        samtools index "${po}/${fn1}-pass.bam"
+	fi
+        if ls "${sd}/Temp-"*"-mapq.sam" 1> /dev/null 2>&1;then
+		cat "${sd}/Temp-"*"-mapq.sam" | samtools sort -@ $threads -m 1G -O bam -o "${po}/${fn1}-mapq.bam" 2>/dev/null
+	        samtools index "${po}/${fn1}-mapq.bam"
+	fi
+        if ls "${sd}/Temp-"*"-recombo.sam" 1> /dev/null 2>&1;then
+		cat "${sd}/Temp-"*"-recombo.sam" | samtools sort -@ $threads -m 1G -O bam -o "${po}/${fn1}-recombo.bam" 2>/dev/null
+	       samtools index "${po}/${fn1}-recombo.bam"
+        fi
+        if compgen -G "${sd}/Temp-"*"-CC.sam" > /dev/null ;then
+		cat "${sd}/Temp-"*"-CC.sam" | samtools sort -@ $threads -m 1G -O bam -o "${po}/${fn1}-CC.bam" 2>/dev/null
+	        samtools index "${po}/${fn1}-CC.bam"
+	fi
+fi
+
+echo $(date +"%Y-%m-%d %T")" $fn1 aggregating SNAQ threads."
+temp=$(stat ${f1} | awk 'BEGIN{FS=" "}$1 ~ /Modify/{print $2 " " $3}'  -)
+cmdLine="$cmdLine -md ${temp/ /_} "
+Rscript --vanilla "${combineScript}" "${cmdLine}" 
+
+#remove scratch dir
+echo $(date +"%Y-%m-%d %T")" $fn1 cleaning up."
+rm -fr "${sd}"
+
