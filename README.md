@@ -1,14 +1,5 @@
 # SNAQ-Vsoft CLI QC tool for viral surveillance NGS testing. 
 
-Table of Contents
------------------
-- [Introduction](#introduction)
-- [Command Line Interface](#command-line-interface)
-- [System requirements](#requirements)
-- [Input data](#data)
-- [Usage](#usage-options)
-- [Docker container](#docker)
-
 ## <a name="introduction"></a> Background-
 
 [AccuGenomics](https://accugenomics.com/) patented and propriety technology, Standardized Nucleic Acid Quantification for Sequencing (SNAQ™-SEQ) is an innovative method that utilizes synthetic DNA or RNA internal standards mixtures (IS) that are spiked into each sample prior to extraction or NGS library preparation steps. These IS are the most optimal way of controlling for variation within the result and are the gold standard method for sensitive bioanalyte measurements.
@@ -44,6 +35,7 @@ The snaq-vsoft scripts are run in this docker.  See docker documentation for mor
 https://hub.docker.com/repository/docker/accugenomics/snaq-seq
 
 ```
+## <a name="Repo-contents"></a> Repo Contents-
 This repo contains example scripts, as well as the working snaq analysis scripts.
 
 Script0c : example bash script on how to feed fastq at a time to snaq-vsoft
