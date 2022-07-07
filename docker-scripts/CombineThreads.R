@@ -50,7 +50,7 @@ outputFile=sub("^.+\\s-of\\s(\\S+).*$","\\1",commandLine)
 
 #import normalizer file, also used to ensure all amplicon positions are represented in dataframes
 normalizerPath=sub("^.+\\s-nf\\s(\\S+).*$","\\1",commandLine)
-normalizer=read.table(file=normalizerPath,header = F,sep="\t",stringsAsFactors = F)
+normalizer=read.table(file=normalizerPath,header = T,sep="\t",stringsAsFactors = F)
 colnames(normalizer)=c("ampliconName","normalizer")
 ccData=data.frame(ampliconName=normalizer$ampliconName[grepl("^~",normalizer$ampliconName)],stringsAsFactors=F)
 ccData$ampliconName=sapply(strsplit(ccData$ampliconName,"-"),'[[',2)

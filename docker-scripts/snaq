@@ -45,16 +45,20 @@ if [[ ! -d ${op} ]];then
 fi
 po="${op%/}"
 if [[ ! -f ${rg} ]];then
-    echo "$(basename ${rg}) reference file does not in $(dirname ${rg})"
+    echo "${rg} Reference file does not exist."
         exit 1
 fi
 ref="${rg}"
 if [[ ! -f ${nf} ]];then
-    echo -e "$(basename ${nf}) normalizer file does not exist in $(dirname ${rg})"
+    echo -e "${nf} Normalizer file does not exist."
          exit 1
 fi
+if ! head -1 "${nf}" | grep -Pq '^IS_CHROM\tRATIO' ;then
+    echo "Error, expecting normalizer file headers of IS_CHROM RATIO"
+    exit 1
+fi
 if [[ ! -f ${bc} ]];then
-    echo "$(basename ${bc}) base change file does not exist in $(dirname ${rg})"
+    echo "${bc} Base change file does not exist."
         exit 1
 fi
 temp="${sd%/}"
@@ -67,7 +71,7 @@ fi
 sd="${temp}"
 
 if [ ! -f "${of}" ];then
-    if ! touch "${of}";then
+    if ! touch "${of}" 2>/dev/null;then
 	    echo "Unable to create results file $of"
         exit 1
     fi
@@ -76,10 +80,8 @@ fi
 
 threads="${th}"
 re='^[0-9]+$'
-if ! [[ ${th} =~ $re ]];then
-	echo "Threads must be an integer"
-    threads=$(($(grep -c processor /proc/cpuinfo)/2))
-    threads=${thread%.*}
+if ! [[ ${th} =~ $re ]] || [[ ${th} == 0 ]];then
+    threads=1
     echo "Setting Threads to $threads" 
 fi
 
@@ -103,11 +105,11 @@ fi
 re='^[+-]?[0-9]+$'
 if ! [[ ${qs} =~ $re ]];then
     echo "Setting minimum base qscore to ignore (-1)"
-        exit 1
+        qs=-1 
 fi
 
 re='^[0-9]+$'
-if ! [[ ${rc} =~ $re ]];then
+if ! [[ ${rc} =~ $re ]] || [[ ${rc} == 0 ]];then
         echo "Setting rejected recombinant base count per fragment to 1"
         rc=1
 fi
