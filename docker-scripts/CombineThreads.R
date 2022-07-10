@@ -247,19 +247,23 @@ ampliconOutput=merge(ampliconOutput,dataTable[dataTable$type=="IS", c("ampNum","
 ampliconOutput=merge(ampliconOutput,abundanceTable[ ,c("ampNum","FASTQ_File_Name","abundance")],by=c("ampNum","FASTQ_File_Name"),all.x = T)
 
 ##Coverage calculation, assume CC amp positions matches primer pool pattern, e.g., CC47, CC48, CC49 exists -> amp 1,4,7...belong to CC47
-
 temp1=gsub("Amp","",ccData$ampliconName)
 if(length(temp1)==0){
     ampliconOutput$ampliconCoverage=NA
 }else{
     ampliconOutput$NTtotCounts=(ampliconOutput$passCount.x +
                 (ampliconOutput$badCount.x + ampliconOutput$badCount.y)/2) #to make mathmatically compatible with CC, use all pass+recombo
+    ampliconOutput$NTpass=NA
+    ampliconOutput$dupl=NA
+    ampliconOutput$cCov=NA
+    ampliconOutput$adj1=NA
+    ampliconOutput$ampliconCoverage=NA
     for (j in seq(1,length(temp1),1)){
         ur=ampliconOutput$NTtotCounts[ampliconOutput$ampNum==temp1[j]]/
-             ccData$CCcount.x[ccData$ampliconName==paste0("Amp",temp1[j])] /
+            ccData$CCcount.x[ccData$ampliconName==paste0("Amp",temp1[j])]/
              ccData$meanCC[ccData$ampliconName==paste0("Amp",temp1[j])]
-    
         i=seq(j,length(ampliconOutput$ampNum),by=length(temp1)) #step through each amplicon pool assumes CC in order.
+       
         ampliconOutput$NTpass[i]=ampliconOutput$NTtotCounts[i] / ur
         ampliconOutput$dupl[i]=ampliconOutput$NTpass[i] /( ccData$ccYield[j] * singleTable$viralLoad) #%CC
         ampliconOutput$dupl[ampliconOutput$dupl<1]=1

@@ -234,7 +234,6 @@ echo $(date +"%Y-%m-%d %T")" $fn1 aggregating SNAQ threads."
 temp=$(stat ${f1} | awk 'BEGIN{FS=" "}$1 ~ /Modify/{print $2 " " $3}'  -)
 cmdLine="$cmdLine -md ${temp/ /_} "
 Rscript --vanilla "${combineScript}" "${cmdLine}" 
-
 #remove scratch dir
 echo $(date +"%Y-%m-%d %T")" $fn1 cleaning up."
 rm -fr "${sd}"
