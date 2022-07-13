@@ -271,7 +271,7 @@ if(length(temp1)==0){
         ampliconOutput$adj1[i]=ampliconOutput$passCount.x[i]/
             ampliconOutput$passCount.y[i] /
             median(ampliconOutput$passCount.x[i]/ampliconOutput$passCount.y[i]) 
-        ampliconOutput$ampliconCoverage[i]=ampliconOutput$cCov[i] /normalizer$normalizer[i] /ampliconOutput$adj1[i] 
+        ampliconOutput$ampliconCoverage[i]=ampliconOutput$cCov[i] * normalizer$normalizer[i] * ampliconOutput$adj1[i] 
     }
 }
 ##new calculation
