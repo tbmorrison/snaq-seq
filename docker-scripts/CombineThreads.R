@@ -180,7 +180,7 @@ abundanceTable$abundance[!is.finite(abundanceTable$abundance)]=NA
 if (nrow(abundanceTable[!is.na(abundanceTable$abundance),])==0){
 	singleTable$viralLoad=0
 }else{
-	viralLoad=setNames(aggregate(abundance~FASTQ_File_Name,data=abundanceTable,median),c("FASTQ_File_Name","viralLoad"))
+	viralLoad=setNames(aggregate(abundance~FASTQ_File_Name,data=abundanceTable,FUN=median,na.rm=T,na.action=NULL),c("FASTQ_File_Name","viralLoad"))
 	singleTable=merge(singleTable,viralLoad,by="FASTQ_File_Name",all.x = T)
 }
 if (nrow(abundanceTable[!is.na(abundanceTable$passCount.x),])==0){
