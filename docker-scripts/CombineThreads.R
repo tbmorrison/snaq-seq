@@ -296,6 +296,21 @@ if(nrow(dataTable[dataTable$type=="IS" & !is.na(dataTable$medRecRate),])==0){
 	temp=setNames(aggregate(medRecRate~FASTQ_File_Name,data=dataTable[dataTable$type=="IS",],median),c("FASTQ_File_Name","ISrecombinantRate"))
 	singleTable=merge(singleTable,temp,by="FASTQ_File_Name",all.x = T)
 }
+#turn all NA and NaN to zero
+ampliconOutput$passCount.x[is.na(ampliconOutput$passCount.x) | is.nan(ampliconOutput$passCount.x)]=0
+ampliconOutput$passCount.y[is.na(ampliconOutput$passCount.y) | is.nan(ampliconOutput$passCount.y)]=0
+ampliconOutput$abundance[is.na(ampliconOutput$abundance) | is.nan(ampliconOutput$abundance)]=0
+ampliconOutput$ampliconCoverage[is.na(ampliconOutput$ampliconCoverage) | is.nan(ampliconOutput$ampliconCoverage)]=0
+ampliconOutput$badCount.x[is.na(ampliconOutput$badCount.x) | is.nan(ampliconOutput$badCount.x)]=0
+ampliconOutput$badCount.y[is.na(ampliconOutput$badCount.y) | is.nan(ampliconOutput$badCount.y)]=0
+ampliconOutput$NMCount.x[is.na(ampliconOutput$NMCount.x) | is.nan(ampliconOutput$NMCount.x)]=0
+ampliconOutput$NMCount.y[is.na(ampliconOutput$NMCount.y) | is.nan(ampliconOutput$NMCount.y)]=0
+ampliconOutput$baseCount.x[is.na(ampliconOutput$baseCount.x) | is.nan(ampliconOutput$baseCount.x)]=0
+ampliconOutput$baseCount.y[is.na(ampliconOutput$baseCount.y) | is.nan(ampliconOutput$baseCount.y)]=0
+ampliconOutput$mapqCount.x[is.na(ampliconOutput$mapqCount.x) | is.nan(ampliconOutput$mapqCount.x)]=0
+ampliconOutput$mapqCount.y[is.na(ampliconOutput$mapqCount.y) | is.nan(ampliconOutput$mapqCount.y)]=0
+
+
 if (! file.exists(outputFile)){
 	temp2=nrow(ampliconOutput)
 	headerString=paste0(headerString,
