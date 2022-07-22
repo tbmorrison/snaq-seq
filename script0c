@@ -75,6 +75,7 @@ done < "${input}"
 #Thus, fasta paths first collected in an array, then array is looped.
 for i in ${!temp1[@]};do
 docker run \
+    -u "$(id -u)":"$(id -g)" \
     --rm \
     -e op="${po}" `#output directory full path` \
     -e rg="${rg}" `#reference genome fasta full path` \
