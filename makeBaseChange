@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+##script0d </path/to/NT-IS-CC.fasta>
+# Example script to make base change file from the NT-IS-CC.fasta.
+# Base change file is used SNAQ vsoft to map base change positions.
+# Base change file will be placed in same directory as the source fasta.
+# Note that modified reference genome, basechange, and normalizer files must be
+# in same directory.
+
+
+echo "IMPORTANT: user must add a '~' tilda symbol in front of the amplicon"
+echo "names corresponding to CC positions.  E.g., ARCV-Amp048 becomes ~ARCV-Amp048"
+ip=$(dirname "${1}")
+
+docker pull accugenomics/snaq-seq:v1.1
+docker run \
+    --rm \
+    -e ref="${1}" `#Full path to AccuGenomics provided NT-IS-CC.fasta file` \
+    -v "${ip}":"${ip}" `#give docker access to the fasta` \
+    -w /home \
+    -ti accugenomics/snaq-seq:v1.1 /bin/bash /snaq-seq/basechange.sh

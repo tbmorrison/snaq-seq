@@ -1,0 +1,22 @@
+SNAQ-SEQ VSOFT SCRIPTS
+Contact Tom Morrison
+
+There are two forms of snaq-vsoft, the base version or a library prep specific version.  The base version
+requires the user to create parameter files specific for their library prep.  The library prep specific versions
+come with correct parameter files preinstalled (e.g., artic-1591-3.1 uses AccuGenomics product
+No. 1591 with the ARTIC 3.1 library prep).  
+
+Files copied into snaq-seq container:
+basechange.sh - This converts a snaq parameter file NT-IS-CC.fasta into a lookup table. Run with script0d
+CombineThreads.R - snaq multi threads various steps, this script combines SNAQ analysis and adds to SNAQ table
+makeBams.sh - for troubleshooting various sorted remRecombo sam files are coverted into bam
+makeFastq.awk - remRecombo output sam NT, this creates NT fastq
+remRecombo.awk - parses aligned fastq files, removes IS and chr, counts various SNAQ QC values
+snaq -main script that performs SNAQ analysis: fastq -> NT fastq + snaq results table. Run with script0c
+
+Accessory scripts
+fastq_lane_merging.sh -used to convert 4 lane data into 1 lane for SNAQ analysis
+snaq-vsoft.sh -example script on how to feed a file with fasta paths into snaq-seq docker
+makeBaseChange -example script on how to used snaq-seq docker to create base change file
+buildDocker.sh & specific.df is used to build panel specific snaq-vsoft containers.
+base.df is used to build the base snaq-vsoft using a command like docker build -t snaq-seq:v1.1 -f ./base.df
