@@ -39,9 +39,12 @@ This repo contains example scripts, as well as the working snaq analysis scripts
 
 | File                  | Description                                                                            |
 |:--------:             | :--------:                                                                             |
-| Script0c              | example bash script on how to feed fastq at a time to snaq-vsoft                       |
-| script0d              | example bash script on how to create base change file used by the snaq analysis script |
+| snaq-vsoft.sh              | example bash script on how to feed fastq at a time to snaq-vsoft                       |
+| makeBaseChange              | example bash script on how to create base change file used by the snaq analysis script |
 | docker-scripts        | contains working copies of the snaq scripts found in the docker container              |
 | fastq_lane_merging.sh | merges multi-lane sample fastq into a single lane for snaq-vsoft analysis              |
 | LICENSE               | MIT license that applies to these scripts                                              |
+| base.df | build the base snaq-vsoft using a command like docker build -t snaq-seq:v1.1 -f ./base.df |
+| buildDocker.sh | build NGS panel specific snaq-vsoft containers |
+| specific.df | Dockerfile used to build NGS specific snaq-vsoft containers |
 
