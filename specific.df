@@ -6,6 +6,8 @@ r-base \
 gawk \
 tabix \
 && rm -rf /var/lib/apt/lists/*
-RUN mkdir /snaq-seq
-COPY ./* /snaq-seq/
+RUN mkdir /REF
+COPY ./REF /REF
 
+RUN mkdir /snaq-seq
+COPY ./snaq-seq /snaq-seq

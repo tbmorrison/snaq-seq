@@ -29,15 +29,17 @@ if [[ ! ${f1} == *.fastq ]] && [[ ! ${f1} == *.fastq.gz ]];then
 	echo "${f1} not a fastq file"
 	exit 1
 fi
-if [[ ! -f ${f2} ]];then
-        echo "${f2} fasta R2 file does not exist"
-        exit 1
+if [[ ${f2} != "NA" ]];then
+    if [[ ! -f ${f2} ]];then
+            echo "${f2} fasta R2 file does not exist"
+            exit 1
+    fi
+    if [[ ! ${f2} == *.fastq ]] && [[ ! ${f2} == *.fastq.gz ]];then
+            echo "${f2} not a fastq file"
+            exit 1
+    fi
 fi
-if [[ ! ${f2} == *.fastq ]] && [[ ! ${f2} == *.fastq.gz ]];then
-        echo "${f2} not a fastq file"
-        exit 1
-fi
-if [[ ! -d ${op} ]];then
+    if [[ ! -d ${op} ]];then
     if ! mkdir -p ${op} 2>/dev/null;then
 	    echo "Unable to create output directory ${op}"
         exit 1
@@ -147,7 +149,7 @@ fi
 fn1=$(basename "${f1%.gz}")
 fn1="${fn1%.fastq}"
 
-if [[ -z ${f2} ]];then
+if [[ ${f2} == "NA" ]];then
 	single=1
 else
 	single=0
@@ -170,7 +172,7 @@ rm -f "${sd}/"*"Count.txt"
 
 if [ $single == 0 ];then
 	echo $(date +"%Y-%m-%d %T")" $fn1 aligning read pairs"
-	bwa mem -v 1 -t $threads $ref $f1 $f2 2>/dev/null |\
+	bwa mem -K 100000000 -Y -v 1 -t $threads $ref $f1 $f2 2>/dev/null |\
 	awk -v path="${sd}" -v threads=$threads 'BEGIN {tick=100}/@/{print $0 >> (path "/temp-101.sam")}!/^@/{pairFound=0;tick++;if(tick>threads+100){tick=101}temp=$1;temp1=$0;while(!pairFound){getline;if(temp==$1){pairFound=1;print temp1 >> (path "/temp-" tick ".sam");print $0 >> (path "/temp-" tick ".sam")}else{temp=$1;temp1=$0}}}' -
 
 	echo $(date +"%Y-%m-%d %T")" $fn1 SNAQ-SEQ analysis"
@@ -182,7 +184,7 @@ if [ $single == 0 ];then
 	done
 else
 	echo $(date +"%Y-%m-%d %T")" $fn1 aligning reads"
-	bwa mem -v 1 -t $threads $ref $f1 2>/dev/null |\
+	bwa mem -K 100000000 -Y -v 1 -t $threads $ref $f1 2>/dev/null |\
 awk -v path=$sd -v threads=$threads 'BEGIN {tick=100}/@/{print $0 >> (path "/temp-101.sam")}!/^@/{tick++;if(tick>threads+100){tick=101}{print $0 >> (path "/temp-" tick ".sam")}}' -
 
 	echo $(date +"%Y-%m-%d %T")" $fn1 SNAQ-SEQ analysis"

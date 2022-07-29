@@ -12,7 +12,7 @@
 #nf="/NGS/REFS/SARS-CoV-2/ARCV30_normalizer.txt"
 #bc="/NGS/REFS/SARS-CoV-2/ARCV30_basechange.txt"
 if [ "$#" -ne 3 ];then
-	echo "script0c <path/to/file/list> <single=1,pair=0> <path/to/SNAQ/output/csv>"
+	echo "snaq-vsoft.sh <path/to/file/list> <single=1,pair=2> <path/to/SNAQ/output/csv>"
 	exit 1
 fi
 
@@ -36,8 +36,8 @@ bc="/NGS/REFS/sarscov2-v41/ARCV41-basechange_file.txt" #removed extra CC lines
 po="$(dirname ${3})"
 of="${3}"
 sd="${po}/scratch"
-cc=850 #Complexity caputre input copies
-is=850 #Internal standard input copies
+cc=2000 #Complexity caputre input copies
+is=2000 #Internal standard input copies
 log="${po}/log.txt"
 tag_sel="v1.1" #version of SNAQ vsoft
 

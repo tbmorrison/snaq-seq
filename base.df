@@ -7,4 +7,4 @@ gawk \
 tabix \
 && rm -rf /var/lib/apt/lists/*
 RUN mkdir /snaq-seq
-COPY docker-scripts /snaq-seq
+COPY ./snaq-seq /snaq-seq

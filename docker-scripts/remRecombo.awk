@@ -43,7 +43,7 @@ BEGIN {
 FNR==1{
 	FNUM++
 ## Design CC with checksum base change at position 1, otherwise a hole in basechange spacing.
-    ##Below is removed to allow checksum basechange into recombo analysis.
+##Below may be removed to allow checksum basechange into recombo analysis.
 #	if(FNUM==2){#No CC position should be in base change hash, first CC position is, remove first CC position
 #			split(ccPos[key],ccRange,":")
 #			keyIS=key "-000-SNAQ-IS"
@@ -52,8 +52,9 @@ FNR==1{
 #			delete ISs[keyIS ":" ccRange[1]]
 #			delete NTs[keyNT ":" ccRange[1]]
 #           	delete NTs[keyIS ":" ccRange[1]]
-#		}
-#	}	
+#	
+#            print  keyNT ":" ccRange[1] "\t" keyIS ":" ccRange[1] "\t" keyNT ":" ccRange[1] "\t" keyIS ":" ccRange[1] > "/dev/stderr"
+#    }   
 }
 FNUM==1{ #process lookup table, pick out sequential lower case REF as CC regions stored in ccPos
 	if(NR==1 && ($1 != "NT_CHROM" || $2 != "NT_POS" || $3 != "NT_REF" || $4 != "IS_CHROM" || $5 != "IS_POS" || $6 != "IS_REF" )) {
@@ -65,28 +66,36 @@ FNUM==1{ #process lookup table, pick out sequential lower case REF as CC regions
 		if($4 ~/-SNAQ-CC$/) {
 			if($5 == lastPos +1){
 				#lower case bases are adjacent
-				if(ccRegion == 0 && $1 ~ /-SNAQ-NT$/) {
-					#first adjacent pair, start scan only on NT x CC 
-					firstPos = lastPos
-					firstBase = lastBase
-					ccRegion = 1 #indicates CC scan is active
-					lastChrom = $4
-					split(lastChrom,temp,"-")
-					lastAmp=temp[2] # used for CC fit distr lastAmp=temp[3]
-				}
-				lastBase=$6
+				if(ccRegion == 0){
+                    ccRegion=1 #stepping through CC region flag
+                    delete ISs[tempChrom ":" tempPos] #first CC base was captured in base change, keep deletes if not REF checksum
+                    delete NTs[tempChrom ":" tempPos]
+                    if($1 ~ /-SNAQ-NT$/) { #only trap CC coordinates from NT CC rows (i.e., don't use IS CC rows)
+                        #first adjacent pair, start scan only on NT x CC 
+					    firstPos = lastPos
+					    firstBase = lastBase
+					    lastChrom = $4
+					    split(lastChrom,temp,"-")
+					    lastAmp=temp[2] # used for CC fit distr lastAmp=temp[3]
+				    }
+                }
+				lastBase=$6 #CC bases now stay in loop until not CC base change found
 				lastPos=$5
 				next
 			} else if(ccRegion) {
 				#TRUE, just exited CC scan
 				# CC region is defined as <flank-base><some # of degenerate bases><flank-base>, capture this in ccPos
 				ccRegion=0
-				temp1=lastChrom;sub("-001-SNAQ-CC","",temp1)
-				ccPos[temp1] = firstPos ":" lastPos ":" toupper(firstBase) ":" toupper(lastBase) ":" lastAmp  #coordinates of CC
-			}
+                if($1 ~ /-SNAQ-NT$/){
+				    temp1=lastChrom;sub("-001-SNAQ-CC","",temp1)
+				    ccPos[temp1] = firstPos ":" lastPos ":" toupper(firstBase) ":" toupper(lastBase) ":" lastAmp  #coordinates of CC
+			    }
+            }
 		}
 		lastPos = $5
 		lastBase=$6
+        tempChrom=$1
+        tempPos=$2
 		ISs[$1 ":" $2] = toupper($3) #CHROM:POS = good base
 		NTs[$1 ":" $2] = toupper($6) #CHROM:POS = bad base
 		if($4 !~/-SNAQ-CC$/){#CC will not be checked for base change positions or recombinants.  CC region has internal checks
