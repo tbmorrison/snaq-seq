@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#script0c <path/to/file/list> <single=1,pair=2> <path/to/SNAQ/output/csv>
+#snaq-vsoft.sh <path/to/file/list> <single=1,pair=2> <path/to/SNAQ/output/csv>
 #This script feeds fastq files, whose full path is pointed to in text file,
 #into indicated SNAQ-SEQ container
 #
@@ -8,10 +8,21 @@
 #NOTE:script assumes reference genome + basechange file + normalizer file are in same directory
 #   output fastq & bams, scratch, output SNAQ CSV are in output directory
 
-#rg="/NGS/REFS/SARS-CoV-2/ARCV30-NT-IS-xCC-amplicon.fasta"
-#nf="/NGS/REFS/SARS-CoV-2/ARCV30_normalizer.txt"
-#bc="/NGS/REFS/SARS-CoV-2/ARCV30_basechange.txt"
-if [ "$#" -ne 3 ];then
+#NOTE: if you're using a container containing refernce genome, remove the indicated lines below
+
+## MODIFY TO MATCH NAME OF CONTAINER ##
+tag_sel="v1.1" #version of SNAQ vsoft
+
+## REMOVE THESE IF USING VSOFT VERSION THAT INCLUDE REFERENCE GENOME ##
+## otherwise change the parameters to fit your NGS run
+rg="/NGS/REFS/sarscov2-v41/hg19-arc41.fasta"
+nf="/NGS/REFS/sarscov2-v41/ARCV41-normalizer220629.txt"
+bc="/NGS/REFS/sarscov2-v41/ARCV41-basechange_file.txt" #removed extra CC lines
+cc=2000 #Complexity caputre input copies
+is=2000 #Internal standard input copies
+## END REMOVAL
+
+if [[ "$#" -ne 3 [] || [[ $1 = "-h" ]] || [[ $1 = "--help" ]];then
 	echo "snaq-vsoft.sh <path/to/file/list> <single=1,pair=2> <path/to/SNAQ/output/csv>"
 	exit 1
 fi
@@ -29,17 +40,10 @@ if [[ ! "$1" == "-b" ]]; then
 	fi
 fi
 
-rg="/NGS/REFS/sarscov2-v41/hg19-arc41.fasta"
-nf="/NGS/REFS/sarscov2-v41/ARCV41-normalizer220629.txt"
-bc="/NGS/REFS/sarscov2-v41/ARCV41-basechange_file.txt" #removed extra CC lines
-
 po="$(dirname ${3})"
 of="${3}"
 sd="${po}/scratch"
-cc=2000 #Complexity caputre input copies
-is=2000 #Internal standard input copies
 log="${po}/log.txt"
-tag_sel="v1.1" #version of SNAQ vsoft
 
 # Get array of tags for accugenomics/snaq-seq
 tags=`wget -q https://registry.hub.docker.com/v1/repositories/accugenomics/snaq-seq/tags -O - | sed -e 's/[][]//g' -e 's/[{}]//g' -e 's/"//g' -e 's/layer: //g' -e 's/name: //g'`
@@ -56,14 +60,16 @@ else
 		eval $pull_cmd
 fi
 
-
+#to use -ti docker option, don't run docker inside a file input loop.
+#Thus, fasta paths first collected in an array, then array is looped.
 input=${1}
 index=0
 while read -r line;do
 
 if [[ ! $line =~ ^# ]];then
     temp1[$index]="${line}"
-	if [[ $2 == "0" || $2 == "2" ]];then
+	temp2[$index]="NA" #default if no R2 exists
+    if [[ $2 = "0" ]] || [[ $2 = "2" ]];then
 		read -r line
 		temp2[$index]="${line}"  
 	fi
@@ -71,15 +77,11 @@ if [[ ! $line =~ ^# ]];then
 fi
 done < "${input}"
 
-#to use -ti docker option, don't run docker in a file input loop.
-#Thus, fasta paths first collected in an array, then array is looped.
 for i in ${!temp1[@]};do
 docker run \
     -u "$(id -u)":"$(id -g)" \
     --rm \
     -e op="${po}" `#output directory full path` \
-    -e rg="${rg}" `#reference genome fasta full path` \
-    -e bc="${bc}" `#full path to base change file` \
     -e sd="${sd}" `#full path to scratch directory` \
     -e of="${of}" `#full path to SNAQ analysis output file` \
     -e th=50 `#number of threads for SNAQ analysis multi thread` \
@@ -91,13 +93,17 @@ docker run \
     -e mbc=1 `#minimum number of base change positions per fragment` \
     -e oi=0 `#oi=1, output fastq containing IS along with NT` \
     -e qs=0 `#ignore basechange position if qscore <qs` \
-    -e nf="${nf}" `#full path to normalizer file` \
     -e is=$is `#IS copies added to sample` \
     -e cc=$cc `#CC copies added to sample` \
     -e f1="${temp1[$i]}" `#full path to fastq R1` \
     -e f2="${temp2[$i]}" `#full path to fastq R2` \
     -v "${po}":"${po}" `#give docker path to output directory` \
-    -v $(dirname "${rg}"):$(dirname "${rg}") `#allow docker access to reference genome directory` \
     -v $(dirname "${temp1}"):$(dirname "${temp1}") `#Allow docker access to fastq file directory` \
+    -e nf="${nf}" `## <---START REMOVE THESE LINES IF USING LIBRARY SPECIFIC CONTAINER.  Full path to normalizer file` \
+    -e rg="${rg}" `#reference genome fasta full path` \
+    -e bc="${bc}" `#full path to base change file` \
+    -e is=$is `#IS copies added to sample` \
+    -e cc=$cc `#CC copies added to sample` \
+    -v $(dirname "${rg}"):$(dirname "${rg}") `## <---END REMOVE.  allow docker access to reference genome directory` \
     -ti "accugenomics/snaq-seq:${tag_sel}" /snaq-seq/snaq >> "${log}"
 done
