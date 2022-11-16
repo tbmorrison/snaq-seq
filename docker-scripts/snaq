@@ -4,6 +4,7 @@
 ##	-f2 <path/fastqR2 (if paired)> 
 ##	-o <path/outputDir (inputPath)> 
 ##	-r <path/refGenome.fasta>
+##  -long 0 if short reads, 1 if long reads
 ##	-bc <path/basechange.txt>
 ##	-sd <scratchDir (outputPath)> 
 ##	-t <threads (machine)>
@@ -87,6 +88,15 @@ if ! [[ ${th} =~ $re ]] || [[ ${th} == 0 ]];then
     echo "Setting Threads to $threads" 
 fi
 
+if [[ $long == 1 ]];then
+    bwaType="bwasw"
+elif [[ $long == 0 ]];then
+    bwaType="mem"
+else
+    bwaType="mem"
+    echo "Setting Long Reads (>199 read length) to FALSE"
+fi
+
 if [ ! ${bo} == 1 ] && [ ! ${bo} == 0 ];then
 	echo "Setting SNAQ bam output to false"
     bo=0
@@ -162,7 +172,7 @@ awkScript="$SCRIPT_DIR/remRecombo.awk"
 makeFastq="$SCRIPT_DIR/makeFastq.awk"
 combineScript="$SCRIPT_DIR/CombineThreads.R"
 
-cmdLine="snaq -f1 ${f1} -f2 ${f2} -o ${po} -r ${ref} -bc ${bc} -t ${threads} -bo ${bo} -cco ${cco} -mf ${mf} -rc ${rc} -mq ${mq} -mbc ${mbc} -oi ${oi} -qs ${qs} -cc ${cc} -is ${is} -nf ${nf} -sd ${sd} -of ${of}"
+cmdLine="snaq -f1 ${f1} -f2 ${f2} -o ${po} -r ${ref} -bc ${bc} -long ${long} -t ${threads} -bo ${bo} -cco ${cco} -mf ${mf} -rc ${rc} -mq ${mq} -mbc ${mbc} -oi ${oi} -qs ${qs} -cc ${cc} -is ${is} -nf ${nf} -sd ${sd} -of ${of}"
 
 echo $(date +"%Y-%m-%d %T")" STARTING $fn1"
 echo $(date +"%Y-%m-%d %T")" $cmdLine"
@@ -172,7 +182,7 @@ rm -f "${sd}/"*"Count.txt"
 
 if [ $single == 0 ];then
 	echo $(date +"%Y-%m-%d %T")" $fn1 aligning read pairs"
-	bwa mem -K 100000000 -Y -v 1 -t $threads $ref $f1 $f2 2>/dev/null |\
+	bwa $bwaType -t $threads $ref $f1 $f2 2>/dev/null |\
 	awk -v path="${sd}" -v threads=$threads 'BEGIN {tick=100}/@/{print $0 >> (path "/temp-101.sam")}!/^@/{pairFound=0;tick++;if(tick>threads+100){tick=101}temp=$1;temp1=$0;while(!pairFound){getline;if(temp==$1){pairFound=1;print temp1 >> (path "/temp-" tick ".sam");print $0 >> (path "/temp-" tick ".sam")}else{temp=$1;temp1=$0}}}' -
 
 	echo $(date +"%Y-%m-%d %T")" $fn1 SNAQ-SEQ analysis"
@@ -184,14 +194,15 @@ if [ $single == 0 ];then
 	done
 else
 	echo $(date +"%Y-%m-%d %T")" $fn1 aligning reads"
-	bwa mem -K 100000000 -Y -v 1 -t $threads $ref $f1 2>/dev/null |\
+	bwa $bwaType -t $threads $ref $f1 2>/dev/null |\
 awk -v path=$sd -v threads=$threads 'BEGIN {tick=100}/@/{print $0 >> (path "/temp-101.sam")}!/^@/{tick++;if(tick>threads+100){tick=101}{print $0 >> (path "/temp-" tick ".sam")}}' -
 
 	echo $(date +"%Y-%m-%d %T")" $fn1 SNAQ-SEQ analysis"
         for (( i=101; i<=(( $threads + 100 )); i++ ))
         do
-                awk -f $awkScript -v single=$single -v resultsPath="${sd}/Temp-${i}" -v samOutput=$bo -v offspringCutoff=$coo -v minFragSize=$mf -v RC=$rc -v mapq=$mq -v qCutoff=$qs -v gbc=$mbc -v outputIS=$oi -v sampleName="${f1}" "${bc}" "$sd/temp-$i.sam" >> "$sd/Temp_R1_part-$i.fastq" &
-                Th[$i]=${!}
+            awk -f $awkScript -v single=$single -v resultsPath="${sd}/Temp-${i}" -v samOutput=$bo -v offspringCutoff=$coo -v minFragSize=$mf -v RC=$rc -v mapq=$mq -v qCutoff=$qs -v gbc=$mbc -v outputIS=$oi -v sampleName="${f1}" "${bc}" "$sd/temp-$i.sam" |\
+            awk '{print "@" $1 "\n" $10 "\n+\n" $11}' - >> "$sd/Temp_R1_part-$i.fastq" &
+            Th[$i]=${!}
         done
 
 fi
