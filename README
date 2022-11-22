@@ -20,3 +20,6 @@ snaq-vsoft.sh -example script on how to feed a file with fasta paths into snaq-s
 makeBaseChange -example script on how to used snaq-seq docker to create base change file
 buildDocker.sh & specific.df is used to build panel specific snaq-vsoft containers.
 base.df is used to build the base snaq-vsoft using a command like docker build -t snaq-seq:v1.1 -f ./base.df
+
+Versions:
+221122 - added bwasw to support long read platforms (>199 read length).
