@@ -1,5 +1,5 @@
 #!/bin/bash
-
+## working directory contains 4-lane files, run script. 
 for i in $(find ./ -type f -name "*.fastq.gz" | while read F; do basename $F | rev | cut -c 22- | rev; done | sort | uniq)
 
     do echo "Merging R1"

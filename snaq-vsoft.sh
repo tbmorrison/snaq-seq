@@ -11,7 +11,7 @@
 #NOTE: if you're using a container containing refernce genome, remove the indicated lines below
 
 ## MODIFY TO MATCH NAME OF CONTAINER ##
-tag_sel="v1.1" #version of SNAQ vsoft
+tag_sel="v1.2beta" #version of SNAQ vsoft
 
 ## REMOVE THESE IF USING VSOFT VERSION THAT INCLUDE REFERENCE GENOME ##
 ## otherwise change the parameters to fit your NGS run
@@ -20,24 +20,12 @@ nf="/NGS/REFS/sarscov2-v41/ARCV41-normalizer220629.txt"
 bc="/NGS/REFS/sarscov2-v41/ARCV41-basechange_file.txt" #removed extra CC lines
 cc=2000 #Complexity caputre input copies
 is=2000 #Internal standard input copies
+longReads=true #long reads (>199 read lengths), false for short reads
 ## END REMOVAL
 
-if [[ "$#" -ne 3 [] || [[ $1 = "-h" ]] || [[ $1 = "--help" ]];then
+if [[ "$#" -ne 3 ]] || [[ $1 = "-h" ]] || [[ $1 = "--help" ]];then
 	echo "snaq-vsoft.sh <path/to/file/list> <single=1,pair=2> <path/to/SNAQ/output/csv>"
 	exit 1
-fi
-
-# Verify Docker installation.
-res=$(docker ps 2>&1)
-res_str=$(echo ${res::+10})
-if [[ ! "$1" == "-b" ]]; then
-	if [ "$res_str" != "CONTAINER" ]; then
-		docker=false
-		printf "** [ERROR] - Docker is not installed...\n\n"
-	else
-		docker=true
-		printf "Docker application verified... \n"
-	fi
 fi
 
 po="$(dirname ${3})"
@@ -67,17 +55,17 @@ index=0
 while read -r line;do
 
 if [[ ! $line =~ ^# ]];then
+    index=$((index+1))
     temp1[$index]="${line}"
 	temp2[$index]="NA" #default if no R2 exists
     if [[ $2 = "0" ]] || [[ $2 = "2" ]];then
 		read -r line
 		temp2[$index]="${line}"  
 	fi
-    index=$((index+1))
 fi
 done < "${input}"
 
-for i in ${!temp1[@]};do
+for ((i=1; i<=index; i++));do
 docker run \
     -u "$(id -u)":"$(id -g)" \
     --rm \
@@ -95,10 +83,11 @@ docker run \
     -e qs=0 `#ignore basechange position if qscore <qs` \
     -e is=$is `#IS copies added to sample` \
     -e cc=$cc `#CC copies added to sample` \
+    -e long=$longReads `#Are these long reads true / false` \
     -e f1="${temp1[$i]}" `#full path to fastq R1` \
     -e f2="${temp2[$i]}" `#full path to fastq R2` \
     -v "${po}":"${po}" `#give docker path to output directory` \
-    -v $(dirname "${temp1}"):$(dirname "${temp1}") `#Allow docker access to fastq file directory` \
+    -v $(dirname "${temp1[$i]}"):$(dirname "${temp1[$i]}") `#Allow docker access to fastq file directory` \
     -e nf="${nf}" `## <---START REMOVE THESE LINES IF USING LIBRARY SPECIFIC CONTAINER.  Full path to normalizer file` \
     -e rg="${rg}" `#reference genome fasta full path` \
     -e bc="${bc}" `#full path to base change file` \
